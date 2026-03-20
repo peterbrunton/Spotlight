@@ -6,7 +6,8 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
- */{
+ */
+ {
   "sections": {
     "cart-section": {
       "type": "main-cart",
@@ -236,7 +237,7 @@
           ]
         }
       },
-      "name": "Featured collection",
+      "name": "t:names.featured_collection",
       "settings": {
         "collection": "all",
         "layout_type": "grid",

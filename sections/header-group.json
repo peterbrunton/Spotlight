@@ -9,43 +9,15 @@
  */
 {
   "type": "header",
-  "name": "Header",
+  "name": "t:names.header",
   "sections": {
     "header_announcements_9jGBFp": {
-      "type": "soc-header-announcement-bar",
+      "type": "header-announcements",
       "blocks": {
         "announcement_BxgCk9": {
-          "type": "_soc-announcement",
+          "type": "_announcement",
           "settings": {
             "text": "Welcome to our store",
-            "link": "",
-            "font": "var(--font-subheading--family)",
-            "font_size": "0.75rem",
-            "weight": "",
-            "letter_spacing": "normal",
-            "case": "none"
-          },
-          "blocks": {}
-        },
-        "announcement_PJAaMf": {
-          "type": "_soc-announcement",
-          "name": "t:names.announcement",
-          "settings": {
-            "text": "Shop our latest arrivals!",
-            "link": "",
-            "font": "var(--font-subheading--family)",
-            "font_size": "0.75rem",
-            "weight": "",
-            "letter_spacing": "normal",
-            "case": "none"
-          },
-          "blocks": {}
-        },
-        "announcement_F7YbcJ": {
-          "type": "_soc-announcement",
-          "name": "t:names.announcement",
-          "settings": {
-            "text": "Blah Blah Blah Blah Blah Blah",
             "link": "",
             "font": "var(--font-subheading--family)",
             "font_size": "0.75rem",
@@ -57,9 +29,7 @@
         }
       },
       "block_order": [
-        "announcement_BxgCk9",
-        "announcement_PJAaMf",
-        "announcement_F7YbcJ"
+        "announcement_BxgCk9"
       ],
       "name": "t:names.announcement_bar",
       "settings": {
@@ -72,7 +42,7 @@
       }
     },
     "header_section": {
-      "type": "soc-header",
+      "type": "header",
       "blocks": {
         "header-logo": {
           "type": "_header-logo",
