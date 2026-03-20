@@ -1,0 +1,330 @@
+<script
+  src="{{ 'soc-countdown-timer.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% assign block_settings = block.settings %}
+
+{% assign raw_ends_at = block_settings.ends_at | strip %}
+
+{% if raw_ends_at contains ' ' %}
+  {% assign parts = raw_ends_at | split: ' ' %}
+  {% assign date_part = parts[0] %}
+  {% assign time_part = parts[1] %}
+
+  {% if time_part %}
+    {% assign time_parts = time_part | split: ':' %}
+    {% if time_parts.size == 2 %}
+      {% assign time_part = time_part | append: ':00' %}
+    {% elsif time_parts.size != 3 %}
+      {% comment %} Invalid time format {% endcomment %}
+      {% assign time_part = '00:00:00' %}
+    {% endif %}
+  {% else %}
+    {% assign time_part = '00:00:00' %}
+  {% endif %}
+
+  {% assign full_datetime = date_part | append: ' ' | append: time_part %}
+  {% assign formatted_ends_at = full_datetime | date: '%Y-%m-%dT%H:%M:%S' %}
+{% else %}
+  {% assign formatted_ends_at = null %}
+{% endif %}
+
+{%- comment %} Validate that Liquid can parse it {%- endcomment %}
+{% assign date_test = formatted_ends_at | date: '%s' %}
+{% if date_test == blank %}
+  {% assign formatted_ends_at = null %}
+{% endif %}
+
+<div
+  class="
+    countdown-timer-block
+    countdown-timer-block--{{ block.id }}
+    border-style
+    spacing-style
+    {% if block_settings.inherit_color_scheme == false %}color-{{ block_settings.color_scheme }}{% endif %}
+    {% if block_settings.css_class %}{{ block_settings.css_class }}{% endif %}
+  "
+  style="
+    --countdown-label-spacing: {{ block_settings.label_spacing }}px;
+    --countdown-unit-width: {{ block_settings.unit_width }}ch;
+    font-size: {{ block_settings.font_size }}px;
+    {% render 'spacing-style', settings: block_settings %}
+    {% render 'border-override', settings: block_settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {% unless formatted_ends_at %}
+    {% if request.design_mode %}
+      <div style="margin: 0.5rem 0; padding: 0.75rem 1rem; background: rgba(255,200,0,0.15); border: 1px solid rgba(255,180,0,0.5); border-radius: 4px; font-size: 0.875rem;">
+        <strong>Invalid date format.</strong> Use <code>YYYY-MM-DD HH:MM</code>, e.g. <code>2025-12-31 23:59</code>.
+      </div>
+    {% endif %}
+  {% else %}
+    <countdown-timer
+      ends-at="{{ formatted_ends_at }}"
+      expiration-behavior="{{ block_settings.expiration_behavior }}"
+      paused
+    >
+      <span slot="days">Days</span>
+      <span slot="hours">Hrs</span>
+      <span slot="minutes">Mins</span>
+      <span slot="seconds">Secs</span>
+
+      <template shadowrootmode="open">
+        <style>
+          :host {
+            display: inline-flex;
+            font-variant-numeric: tabular-nums;
+            gap: var(--countdown-label-spacing, 0.5rem);
+            --cd-unit-width: 2.5ch;
+            line-height: 1;
+          }
+
+          .timer {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+          }
+
+          .unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: var(--countdown-unit-width, var(--cd-unit-width));
+            text-align: center;
+          }
+
+          .value {
+            font-weight: var(--countdown-font-weight, bold);
+            font-size: inherit;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .value {
+              transition: none;
+            }
+          }
+        </style>
+
+        <div class="timer">
+          <div class="unit">
+            <div class="value"><span ref="daysValue">00</span></div>
+            <div class="label"><slot name="days">Days</slot></div>
+          </div>
+          <div>:</div>
+          <div class="unit">
+            <div class="value"><span ref="hoursValue">00</span></div>
+            <div class="label"><slot name="hours">Hrs</slot></div>
+          </div>
+          <div>:</div>
+          <div class="unit">
+            <div class="value"><span ref="minutesValue">00</span></div>
+            <div class="label"><slot name="minutes">Mins</slot></div>
+          </div>
+          <div>:</div>
+          <div class="unit">
+            <div class="value"><span ref="secondsValue">00</span></div>
+            <div class="label"><slot name="seconds">Secs</slot></div>
+          </div>
+        </div>
+      </template>
+    </countdown-timer>
+  {% endunless %}
+</div>
+
+{% stylesheet %}
+  .countdown-timer-block {
+    display: inline-block;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Countdown Timer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Timer Settings"
+    },
+    {
+      "type": "text",
+      "id": "ends_at",
+      "label": "End Date & Time",
+      "placeholder": "Eg. 2025-12-25 23:59",
+      "info": "Format: YYYY-MM-DD HH:MM (24-hour). Time is interpreted in the visitor's local browser timezone."
+    },
+    {
+      "type": "select",
+      "id": "expiration_behavior",
+      "label": "When timer ends",
+      "options": [
+        { "value": "none", "label": "Keep visible" },
+        { "value": "hide", "label": "Hide this block" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size",
+      "min": 10,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "unit_width",
+      "label": "Unit Width",
+      "min": 1,
+      "max": 10,
+      "step": 0.5,
+      "unit": "ch",
+      "default": 2.5,
+      "info": "Width of each time unit (days, hours, etc.)"
+    },
+    {
+      "type": "range",
+      "id": "label_spacing",
+      "label": "Label Spacing",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "inherit_color_scheme",
+      "label": "Inherit color scheme",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1",
+      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
+    },
+    {
+      "type": "header",
+      "content": "Spacing & Borders"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "Border",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "solid", "label": "Solid" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Thickness",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.border != \"none\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "label": "Opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.border != \"none\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "CSS"
+    },
+    {
+      "type": "text",
+      "id": "css_class",
+      "label": "CSS class",
+      "info": "Add a custom class to target this block"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown Timer",
+      "category": "t:categories.basic",
+      "settings": {
+        "ends_at": "2025-12-31 23:59",
+        "expiration_behavior": "hide",
+        "font_size": 18,
+        "unit_width": 3,
+        "label_spacing": 12,
+        "padding-block-start": 20,
+        "padding-block-end": 20,
+        "padding-inline-start": 20,
+        "padding-inline-end": 20,
+        "border": "solid",
+        "border_width": 2,
+        "border_radius": 8
+      }
+    }
+  ]
+}
+{% endschema %}

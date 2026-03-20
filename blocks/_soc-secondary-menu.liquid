@@ -1,0 +1,298 @@
+{%- doc -%}
+  Renders a secondary header menu block with submenu support.
+  Reuses the existing header-menu component for maximum performance.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign menu_links = block_settings.secondary_menu.links
+  assign animation_delay = 150
+%}
+
+{% if menu_links.size > 0 %}
+  <header-menu
+    class="header-secondary-menu"
+    {{ block.shopify_attributes }}
+    data-animation-delay="{{ animation_delay }}"
+    style="
+      --secondary-menu-font-family: var(--font-{{ block_settings.font }}--family);
+      --secondary-menu-font-style: var(--font-{{ block_settings.font }}--style);
+      --secondary-menu-font-weight: var(--font-{{ block_settings.font }}--weight);
+      --secondary-menu-font-size: {{ block_settings.font_size }};
+      --secondary-menu-font-case: {{ block_settings.text_case }};
+      --secondary-menu-gap: {{ block_settings.menu_gap }}px;
+      --submenu-animation-speed: {{ animation_delay }}ms;
+    "
+  >
+    <div class="header-secondary-menu__inner">
+      <nav class="secondary-menu-nav">
+        <ul class="menu-list__list list-unstyled" role="list">
+          {% for link in menu_links %}
+            <li
+              role="presentation"
+              class="menu-list__list-item header-secondary-menu__item"
+              on:focus="/activate"
+              on:blur="/deactivate"
+              on:pointerenter="/activate"
+              on:pointerleave="/deactivate"
+            >
+              <a
+                href="{{ link.url }}"
+                data-skip-node-update="true"
+                class="menu-list__link header-secondary-menu__link{% if link.active %} menu-list__link--active{% endif %}"
+                {%- if link.links != blank -%}
+                  aria-controls="secondary-submenu-{{ forloop.index }}"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                {%- endif -%}
+                ref="menuitem"
+              >
+                <span class="menu-list__link-title">{{- link.title -}}</span>
+              </a>
+              {%- if link.links != blank -%}
+                <div class="menu-list__submenu header-secondary-menu__submenu" ref="submenu[]">
+                  <div
+                    id="secondary-submenu-{{ forloop.index }}"
+                    class="menu-list__submenu-inner header-secondary-menu__submenu-inner"
+                  >
+                    <ul class="header-secondary-menu__submenu-list list-unstyled" role="list">
+                      {% for childlink in link.links %}
+                        <li class="header-secondary-menu__submenu-item">
+                          <a
+                            href="{{ childlink.url }}"
+                            class="header-secondary-menu__submenu-link{% if childlink.current %} header-secondary-menu__submenu-link--active{% endif %}"
+                            {% if childlink.current %}
+                              aria-current="page"
+                            {% endif %}
+                          >
+                            {{ childlink.title | escape }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              {%- endif -%}
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+  </header-menu>
+{% endif %}
+
+{% stylesheet %}
+  .header-secondary-menu {
+    width: auto;
+
+    @media screen and (max-width: 749px) {
+      display: none;
+    }
+  }
+
+  .header-secondary-menu__inner {
+    display: flex;
+    align-items: center;
+  }
+
+  .header-secondary-menu .menu-list__list {
+    gap: var(--secondary-menu-gap, var(--gap-lg));
+    justify-content: flex-end;
+  }
+
+  .header-secondary-menu .menu-list__list-item {
+    position: relative;
+  }
+
+  .header-secondary-menu .menu-list__link {
+    font-family: var(--secondary-menu-font-family);
+    font-style: var(--secondary-menu-font-style);
+    font-weight: var(--secondary-menu-font-weight);
+    font-size: var(--secondary-menu-font-size);
+    text-transform: var(--secondary-menu-font-case);
+    gap: var(--gap-2xs);
+  }
+
+  /* Override submenu positioning for secondary menu */
+  .header-secondary-menu .menu-list__submenu {
+    position: absolute;
+    top: calc(100% + var(--padding-2xs));
+    right: 0;
+    left: auto;
+    transform: none;
+    min-width: 120px;
+    width: auto;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-popover);
+    z-index: var(--layer-popover);
+
+    /* Reset main menu styles */
+    clip-path: none;
+    padding-inline: 0;
+
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--padding-2xs)));
+    transition: visibility var(--submenu-animation-speed) var(--animation-easing),
+      opacity var(--submenu-animation-speed) var(--animation-easing),
+      transform var(--submenu-animation-speed) var(--animation-easing);
+  }
+
+  /* Show submenu when parent is active */
+  .header-secondary-menu .menu-list__list-item:has([aria-expanded='true']) > .menu-list__submenu {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .header-secondary-menu .menu-list__submenu-inner {
+    padding: var(--padding-xs);
+    grid-column: unset;
+    display: block;
+  }
+
+  .header-secondary-menu__submenu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .header-secondary-menu__submenu-item {
+    white-space: nowrap;
+  }
+
+  .header-secondary-menu__submenu-link {
+    display: block;
+    padding: var(--padding-2xs) var(--padding-xs);
+    color: var(--color-foreground);
+    text-decoration: none;
+    font-size: calc(var(--secondary-menu-font-size) * 0.9);
+    font-family: var(--secondary-menu-font-family);
+    border-radius: calc(var(--border-radius) * 0.5);
+    transition: background-color var(--animation-speed) var(--animation-easing),
+      color var(--animation-speed) var(--animation-easing);
+
+    &:hover,
+    &:focus {
+      background-color: var(--color-background-secondary);
+      color: var(--color-foreground);
+    }
+  }
+
+  .header-secondary-menu__submenu-link--active {
+    color: var(--color-primary-button-background);
+    background-color: rgb(var(--color-primary-button-background-rgb) / 0.1);
+  }
+
+  /* Responsive positioning */
+  @media screen and (max-width: 990px) {
+    .header-secondary-menu .menu-list__submenu {
+      left: auto;
+      right: 0;
+      transform: translateY(calc(-1 * var(--padding-2xs)));
+    }
+
+    .header-secondary-menu .menu-list__list-item:has([aria-expanded='true']) > .menu-list__submenu {
+      transform: translateY(0);
+    }
+  }
+
+  /* Integration with existing header hover effects */
+  .header-secondary-menu {
+    transition: opacity var(--animation-speed) var(--animation-easing);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Secondary Menu",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "secondary_menu",
+      "label": "Secondary Menu",
+      "info": "Menu with dropdown support"
+    },
+    {
+      "type": "header",
+      "content": "t:content.typography"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "body",
+          "label": "t:options.body"
+        },
+        {
+          "value": "subheading",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "heading",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "accent",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "Font size",
+      "options": [
+        {
+          "value": "0.75rem",
+          "label": "12px"
+        },
+        {
+          "value": "0.875rem",
+          "label": "14px"
+        },
+        {
+          "value": "1rem",
+          "label": "16px"
+        },
+        {
+          "value": "1.125rem",
+          "label": "18px"
+        }
+      ],
+      "default": "0.875rem"
+    },
+    {
+      "type": "select",
+      "id": "text_case",
+      "label": "Text case",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "menu_gap",
+      "label": "Menu spacing",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ]
+}
+{% endschema %}

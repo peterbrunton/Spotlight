@@ -1,0 +1,10 @@
+THEME CHANGES — Non-soc-prefixed File Modifications
+=====================================================
+This file tracks every change made to files that do NOT use the soc- prefix.
+These are modifications to base theme files and should be re-applied if the
+theme is updated by Shopify/the theme developer.
+
+No changes recorded yet.
+
+=====================================================
+END OF CHANGES LOG
