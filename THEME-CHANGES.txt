@@ -4,7 +4,15 @@ This file tracks every change made to files that do NOT use the soc- prefix.
 These are modifications to base theme files and should be re-applied if the
 theme is updated by Shopify/the theme developer.
 
-No changes recorded yet.
+---
+FILE: snippets/header-row.liquid
+DATE: 2026-03-20
+REASON: Required to support secondary_menu slot in soc-header.liquid.
+  The base snippet routes header items to columns via a case statement.
+  Without this entry, the secondary_menu capture is silently discarded.
+CHANGE: Added `{% when 'secondary_menu' %}{{ secondary_menu }}` case
+  inside the `{% for key in items_array %}` loop, between drawer_search and actions.
+---
 
 =====================================================
 END OF CHANGES LOG
