@@ -1,0 +1,127 @@
+{% assign block_settings = block.settings %}
+{% if block_settings.title != blank %} 
+<div
+  class="tab-panel"
+  id="tab-panel-{{ block.id }}"
+  role="tabpanel"
+  aria-labelledby="tab-title-{{ block.id }}"
+  {% if block_settings.active_by_default %}active{% endif %}
+>
+  <div
+    class="tab-panel__title"
+    id="tab-title-{{ block.id }}"
+    role="tab"
+    aria-controls="tab-panel-{{ block.id }}"
+    aria-selected="{% if block_settings.active_by_default %}true{% else %}false{% endif %}"
+    tabindex="{% if block_settings.active_by_default %}0{% else %}-1{% endif %}"
+  >
+    {{ block_settings.title }}
+  </div>
+  <div class="tab-panel__content">
+    {% content_for 'blocks' %}
+  </div>
+</div>
+{% endif %}
+{% schema %}
+{
+  "name": "Tab panel",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "@theme"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:settings.title",
+      "default": "New Tab"
+    },
+    {
+      "type": "checkbox",
+      "id": "active_by_default",
+      "label": "Open by default",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:content.icon"
+    },
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "t:settings.icon",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "apple",
+          "label": "t:options.apple"
+        },
+        {
+          "value": "arrow",
+          "label": "t:options.arrow"
+        },
+        {
+          "value": "heart",
+          "label": "t:options.heart"
+        },
+        {
+          "value": "leaf",
+          "label": "t:options.leaf"
+        },
+        {
+          "value": "star",
+          "label": "t:options.star"
+        },
+        {
+          "value": "truck",
+          "label": "t:options.truck"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_upload",
+      "label": "t:settings.image_icon"
+    },
+    {
+      "type": "range",
+      "id": "width",
+      "label": "t:settings.width",
+      "min": 12,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.tab_panel",
+      "settings": {
+        "title": "Shipping Info"
+      },
+      "blocks": {
+        "text-1": {
+          "type": "t-ext-text",
+          "settings": {
+            "text": "<p>Free shipping on all orders over $50.</p>",
+            "width": "100%"
+          }
+        }
+      },
+      "block_order": [
+        "text-1"
+      ]
+    }
+  ]
+}
+{% endschema %}

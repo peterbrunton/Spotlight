@@ -1,0 +1,10 @@
+<svg
+    aria-hidden="true"
+    fill="none"
+    focusable="false"
+    width="{{ width | default: 24 }}"
+    class="{{ class | strip }}"
+    viewBox="0 0 24 24"
+>
+  <path d="M1 19h22M1 12h22M1 5h22" stroke="currentColor" stroke-width="{{ stroke_width | default: settings.icon_stroke_width }}" stroke-linecap="square"/>
+</svg>

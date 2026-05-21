@@ -1,0 +1,25 @@
+{%- doc -%}
+  Renders a variation swatch
+
+  @param {object} variation_product - The variation product object
+  @param {string} [variation_title] - Display title (falls back to product metafield if blank)
+{%- enddoc -%}
+
+{% liquid
+  assign variation_title = variation_title | default: variation_product.metafields.soc_meta.product_variations_titles.value
+  assign swatch_image_url = variation_title | handleize | prepend: 's-ext-swatch-' | append: '.svg'
+%}
+
+<span class="swatch">
+  <img
+    src="{{ swatch_image_url | asset_url }}"
+    width="40"
+    height="40"
+    alt="{{ variation_title }}"
+    onerror="this.style.display='none';
+            this.parentElement.classList.remove('swatch');
+            this.parentElement.classList.add('swatch-text-backup');
+            this.nextElementSibling.style.display='flex';"
+  />
+  <span style="display:none;" class="swatch__label">{{ variation_title }}</span>
+</span>

@@ -1,0 +1,852 @@
+{% if section.settings.enable %}
+<gwp-container data-section-id="{{ section.id }}">
+  {% for block in section.blocks %}
+
+  <!--
+    Check if block should render on this page 
+  -->
+  {% assign should_render = false %}
+
+  {% if block.settings.isolate_to_page %}
+    <!--
+      Isolation is enabled - check conditions 
+    -->
+    {% assign target_type = block.settings.page_type %}
+    {% assign target_handle = block.settings.page_handle | strip | downcase %}
+
+    <!--
+      For collection-based GWP:
+      If we're targeting a collection and no page_handle is set,
+      fall back to the selected collection handle from the block.
+    -->
+    {% if block.type == 'gwp_collection_item'
+          and target_type == 'collection'
+          and target_handle == blank
+          and block.settings.conditional_collection != blank %}
+      {% assign target_handle = block.settings.conditional_collection | downcase %}
+    {% endif %}
+
+    {% if target_type == 'collection' %}
+      <!--
+        Collection page itself 
+      -->
+      {% if request.page_type == 'collection' %}
+        {% assign current_handle = collection.handle | downcase %}
+        {% if target_handle == blank or current_handle == target_handle %}
+          {% assign should_render = true %}
+        {% endif %}
+
+      <!--
+        Product pages whose product is in that collection
+      -->
+      {% elsif request.page_type == 'product' and target_handle != blank %}
+        {% assign in_target_collection = false %}
+        {% for coll in product.collections %}
+          {% if coll.handle == target_handle %}
+            {% assign in_target_collection = true %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+        {% if in_target_collection %}
+          {% assign should_render = true %}
+        {% endif %}
+      {% endif %}
+
+    {% elsif target_type == 'product' and request.page_type == 'product' %}
+      {% assign current_handle = product.handle | downcase %}
+      {% if target_handle == blank or current_handle == target_handle %}
+        {% assign should_render = true %}
+      {% endif %}
+
+    {% elsif target_type == 'page' and request.page_type == 'page' %}
+      {% assign current_handle = page.handle | downcase %}
+      {% if target_handle == blank or current_handle == target_handle %}
+        {% assign should_render = true %}
+      {% endif %}
+
+    {% elsif target_type == 'all' %}
+      {% assign should_render = true %}
+    {% endif %}
+  {% else %}
+    {% comment %} No isolation - render everywhere {% endcomment %}
+    {% assign should_render = true %}
+  {% endif %}
+
+    
+    {% if should_render %}
+      {% case block.type %}
+        {% when 'gwp_threshold_item' %}
+          {% assign gift_product = all_products[block.settings.product] %}
+
+          {% capture gwp_json %}
+          {
+            "type": "threshold",
+            "productHandle": {{ block.settings.product | json }},
+            "threshold": {{ block.settings.threshold | times: 100 | round: 0 }},
+            "productTitle": {{ gift_product.title | json }},
+            "productImage": {{ gift_product.featured_image | image_url: width: 300 | json }},
+            "productPrice": {{ gift_product.price | json }},
+            "productCompareAtPrice": {{ gift_product.compare_at_price | json }}
+          }
+          {% endcapture %}
+
+          <gwp-threshold-item class="gwp-product-injection--item hidden" data-gwp='{{ gwp_json | strip_newlines | strip }}'>
+            <span>Your free gift, <strong>{{ all_products[block.settings.product].title }}</strong>, has been added.</span>
+          </gwp-threshold-item>
+          
+        {% when 'gwp_collection_item' %}
+          {% assign collection_products = collections[block.settings.conditional_collection].products | map: 'handle' | json %}
+          {% assign gift_product = all_products[block.settings.product] %}
+          {% capture gwp_json %}
+          {
+            "type": "collection",
+            "productHandle": {{ block.settings.product | json }},
+            "collectionHandle": {{ block.settings.conditional_collection | json }},
+            "collectionProducts": {{ collection_products }},
+            "minQuantity": {{ block.settings.min_quantity | default: 1 }},
+            "productTitle": {{ gift_product.title | json }},
+            "productImage": {{ gift_product.featured_image | image_url: width: 300 | json }},
+            "productPrice": {{ gift_product.price | json }},
+            "productCompareAtPrice": {{ gift_product.compare_at_price | json }}
+          }
+          {% endcapture %}
+
+          <gwp-collection-item class="gwp-product-injection--item hidden" data-gwp='{{ gwp_json | strip_newlines | strip }}'>
+            <span>Your free gift, <strong>{{ all_products[block.settings.product].title }}</strong>, has been added.</span>
+          </gwp-collection-item>
+      {% endcase %}
+    {% endif %}
+  {% endfor %}
+
+  {% if section.settings.enable_dialog %}
+  {%- comment -%} GWP Floating Gift Button + Dialog {%- endcomment -%}
+  <gwp-dialog id="gwp-gift-dialog" class="gwp-gift">
+    {%- comment -%} Floating button that will open/close the dialog {%- endcomment -%}
+    <button
+      type="button"
+      class="gwp-gift__fab"
+      aria-label="View your free gifts"
+      data-gwp-dialog-toggle
+      data-ref="fab"
+      ref="fab"
+    >
+      <span class="gwp-gift__icon" aria-hidden="true">
+        <!-- Gift SVG icon -->
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          role="presentation"
+          focusable="false"
+        >
+          <rect
+            x="3"
+            y="9"
+            width="18"
+            height="12"
+            rx="2"
+            ry="2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          />
+          <path
+            d="M12 9v12"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          />
+          <path
+            d="M3 9h18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          />
+          <path
+            d="M8.25 5.25C7.4 4.5 6 4.55 5.28 5.39 4.55 6.23 4.6 7.6 5.46 8.32 6.05 8.83 6.86 9 7.77 9H12
+              c-.15-.84-.54-2.07-1.23-2.77-.9-.91-2.4-.89-3.52-.98Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M15.75 5.25c.85-.75 2.25-.7 2.97.14.73.84.68 2.21-.18 2.93C18 8.83 17.19 9 16.28 9H12
+              c.15-.84.54-2.07 1.23-2.77.9-.91 2.4-.89 3.52-.98Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+
+      {%- comment -%} Badge for number of gifts/offers {%- endcomment -%}
+      <span class="gwp-gift__badge" data-ref="badge" ref="badge" hidden>1</span>
+    </button>
+
+    {%- comment -%} Dialog shell {%- endcomment -%}
+    <dialog
+      class="gwp-gift__dialog dialog"
+      ref="dialog"
+      data-ref="dialog"
+      aria-label="Your free gifts"
+    >
+      <div class="gwp-gift__dialog-inner">
+        <button
+          type="button"
+          class="gwp-gift__dialog-close"
+          aria-label="Close gifts"
+          data-gwp-dialog-close
+          data-ref="close"
+          ref="close"
+        >
+          ×
+        </button>
+
+        <div class="gwp-gift__dialog-body" data-ref="body" ref="body">
+          <!-- placeholder; we’ll hook this up to GWPManager later -->
+          <p>Loading your gifts…</p>
+        </div>
+      </div>
+    </dialog>
+  </gwp-dialog>
+  {% endif %}
+
+
+</gwp-container>
+
+<script type="module" defer>
+  import { fetchConfig, requestYieldCallback, scheduler } from '@theme/utilities';
+  import { ThemeEvents, CartAddEvent, CartUpdateEvent } from '@theme/events';
+
+  class GWPManager {
+    #userRemovedGift = false;
+    #readdTimer = null;
+
+    constructor() {
+      this.boundHandle = this.handleCartUpdate.bind(this);
+      this.debouncedHandle = () => {
+        requestYieldCallback(() => {
+          setTimeout(this.boundHandle, 50);
+        });
+      };
+
+      this.handleRemoveClick = this.handleRemoveClick.bind(this);
+    }
+
+    init() {
+      document.addEventListener(ThemeEvents.cartUpdate, this.debouncedHandle);
+
+      document.addEventListener('click', this.handleRemoveClick);
+
+      this.debouncedHandle();
+    }
+
+    async handleCartUpdate() {
+      if (this.#userRemovedGift) return;
+
+      const cart = await this.getCart();
+      if (!cart) return;
+
+      const gwpItems = document.querySelectorAll('gwp-threshold-item, gwp-collection-item');
+      const updates = {};
+      const additions = [];
+
+      this.dispatchGiftState(cart, gwpItems);
+
+      for (const el of gwpItems) {
+        const config = this.parseConfig(el);
+        if (!config) continue;
+
+        const variantId = await this.getVariantId(config.productHandle);
+        if (!variantId) continue;
+
+        const shouldBeActive = this.checkCondition(config, cart);
+        const giftInCart = this.isGiftInCart(cart, config.productHandle);
+
+        if (shouldBeActive && !giftInCart) {
+          additions.push({ variantId, handle: config.productHandle });
+        } else if (!shouldBeActive && giftInCart) {
+          const cartItem = cart.items.find(i => 
+            i.handle === config.productHandle && 
+            i.properties?._injected_gwp_item === 'true'
+          );
+          if (cartItem) {
+            updates[cartItem.key] = 0;
+          }
+        }
+      }
+
+      if (Object.keys(updates).length > 0 || additions.length > 0) {
+        scheduler.schedule(async () => {
+          try {
+            let updatedCart = cart;
+
+            if (Object.keys(updates).length > 0) {
+              const removeResp = await fetch('/cart/update.js', {
+                ...fetchConfig(),
+                body: JSON.stringify({ updates })
+              });
+              if (removeResp.ok) {
+                updatedCart = await removeResp.json();
+              } else {
+                throw new Error(`Failed to remove items: ${removeResp.status}`);
+              }
+            }
+
+            if (additions.length > 0) {
+              await this.addGifts(additions);
+              const resp = await fetch('/cart.js');
+              updatedCart = await resp.json();
+            }
+
+            requestYieldCallback(() => {
+              const event = new CartUpdateEvent(updatedCart, 'gwp-container', {
+                source: 'gwp',
+                itemCount: updatedCart?.item_count || 0
+              });
+              document.dispatchEvent(event);
+            });
+          } catch (error) {
+            console.error('❌ GWP: Failed to apply changes', error);
+            document.dispatchEvent(new CartUpdateEvent(null, 'gwp-container', {
+              source: 'gwp',
+              didError: true
+            }));
+          }
+        });
+      }
+    }
+
+    handleRemoveClick(event) {
+      const removeBtn = event.target.closest('.cart-items__remove');
+      if (!removeBtn) return;
+
+      const row = removeBtn.closest('[data-key]');
+      if (!row) return;
+
+      const isGwpItem = row.dataset.gwpItem === 'true';
+      if (!isGwpItem) return;
+
+      this.markGiftRemoved();
+    }
+
+    markGiftRemoved() {
+      this.#userRemovedGift = true;
+      clearTimeout(this.#readdTimer);
+      this.#readdTimer = setTimeout(() => {
+        this.#userRemovedGift = false;
+      }, 3000);
+    }
+
+    parseConfig(el) {
+      try {
+        return JSON.parse(el.dataset.gwp);
+      } catch (e) {
+        console.error('Invalid GWP config:', e);
+        return null;
+      }
+    }
+
+    async getCart() {
+      try {
+        const resp = await fetch('/cart.js');
+        if (!resp.ok) throw new Error('Failed to fetch cart');
+        return await resp.json();
+      } catch (e) {
+        console.error('GWP: Failed to fetch cart:', e);
+        return null;
+      }
+    }
+
+    async getVariantId(handle) {
+      try {
+        const resp = await fetch(`/products/${handle}.js`);
+        if (!resp.ok) throw new Error('Product not found');
+        const product = await resp.json();
+        const variant = product.variants.find(v => v.available);
+        return variant ? variant.id : null;
+      } catch (e) {
+        console.error('Failed to fetch variant:', e);
+        return null;
+      }
+    }
+
+    checkCondition(config, cart) {
+      if (config.type === 'threshold') {
+        return cart.total_price >= config.threshold;
+      }
+
+      if (config.type === 'collection') {
+        const collectionProducts = config.collectionProducts || [];
+        let qualifyingQuantity = 0;
+
+        for (const item of cart.items) {
+          if (item.properties?._injected_gwp_item === 'true') continue;
+          if (collectionProducts.includes(item.handle)) {
+            qualifyingQuantity += item.quantity;
+          }
+        }
+
+        return qualifyingQuantity >= (config.minQuantity || 1);
+      }
+
+      return false;
+    }
+
+    isGiftInCart(cart, handle) {
+      return cart.items.some(item => 
+        item.handle === handle && 
+        item.properties?._injected_gwp_item === 'true'
+      );
+    }
+
+    buildGiftState(cart, gwpItems) {
+
+      const earned = [];
+      const locked = [];
+
+      for (const el of gwpItems) {
+        const config = this.parseConfig(el);
+        if (!config) continue;
+
+        const isActive = this.checkCondition(config, cart);
+        const isInCart = this.isGiftInCart(cart, config.productHandle);
+
+        const base = {
+          handle: config.productHandle,
+          type: config.type,
+          title: config.productTitle,
+          image: config.productImage,
+          price: config.productPrice,
+          compareAtPrice: config.productCompareAtPrice,
+          threshold: config.threshold,
+          minQuantity: config.minQuantity
+        };
+
+        if (isActive && isInCart) {
+          earned.push(base);
+        } else if (!isActive && !isInCart) {
+          locked.push(base);
+        }
+      }
+
+      return { earned, locked, cartTotalPrice: cart.total_price };
+    }
+
+    dispatchGiftState(cart, gwpItems) {
+      const state = this.buildGiftState(cart, gwpItems);
+      document.dispatchEvent(
+        new CustomEvent('gwp:state-changed', { detail: state })
+      );
+    }
+
+
+    async addGifts(gifts) {
+      const formData = new FormData();
+      
+      gifts.forEach(gift => {
+        formData.append('items[][id]', gift.variantId);
+        formData.append('items[][quantity]', 1);
+        formData.append('items[][properties][_injected_gwp_item]', 'true');
+      });
+
+      document.querySelectorAll('cart-items-component').forEach(cmp => {
+        if (cmp.dataset.sectionId) {
+          formData.append('sections', cmp.dataset.sectionId);
+        }
+      });
+
+      formData.append('sections_url', window.location.pathname);
+
+      const fetchCfg = fetchConfig('javascript', { body: formData });
+      fetchCfg.headers.Accept = 'text/html';
+
+      const resp = await fetch('/cart/add.js', fetchCfg);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      
+      const data = await resp.json();
+      if (data.status === 'error') throw new Error(data.message);
+
+      if (data.sections) {
+        requestYieldCallback(() => {
+          document.dispatchEvent(
+            new CartAddEvent(
+              {},
+              'gwp-container',
+              {
+                source: 'gwp',
+                itemCount: gifts.length,
+                sections: data.sections,
+                didError: false
+              }
+            )
+          );
+        });
+      }
+    }
+  }
+
+  const gwpManager = new GWPManager();
+  gwpManager.init();
+  window.gwpManager = gwpManager;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import { DialogComponent } from '@theme/dialog';
+export class GWPGiftDialog extends DialogComponent {
+  requiredRefs = ['dialog', 'fab', 'badge', 'body', 'close'];
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    const { fab, close } = this.refs;
+
+    fab.addEventListener('click', this.toggleDialog);
+    close.addEventListener('click', this.closeDialog);
+
+    // Listen for state updates from GWPManager
+    document.addEventListener('gwp:state-changed', this.#handleStateChange);
+
+    // Optionally: start hidden until we know there’s something to show
+    this.style.display = 'none';
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+
+    const { fab, close } = this.refs;
+    fab.removeEventListener('click', this.toggleDialog);
+    close.removeEventListener('click', this.closeDialog);
+
+    document.removeEventListener('gwp:state-changed', this.#handleStateChange);
+  }
+
+  #formatMoney(cents) {
+    if (typeof cents !== 'number') return '';
+
+    // Prefer Shopify's helper if available
+    if (window.Shopify && typeof Shopify.formatMoney === 'function') {
+      return Shopify.formatMoney(cents);
+    }
+
+    const currency =
+      window.Shopify?.currency?.active ||
+      document.documentElement.getAttribute('data-shopify-currency') ||
+      'USD';
+
+    return (cents / 100).toLocaleString(undefined, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+    });
+  }
+
+  #handleStateChange = (event) => {
+    const state = event.detail;
+    if (!state) return;
+
+    const { earned = [], locked = [], cartTotalPrice = 0 } = state;
+    const totalOffers = earned.length + locked.length;
+
+    if (totalOffers === 0) {
+      this.style.display = 'none';
+      return;
+    } else {
+      this.style.display = '';
+    }
+
+    const { badge, body } = this.refs;
+    badge.textContent = String(totalOffers);
+    badge.hidden = totalOffers <= 0;
+
+    body.innerHTML = '';
+
+    if (earned.length) {
+      const section = document.createElement('section');
+      const heading = document.createElement('h3');
+      heading.textContent = 'You got this!';
+      section.appendChild(heading);
+
+      earned.forEach((gift) => {
+        const item = document.createElement('article');
+        item.className = 'gwp-gift__item gwp-gift__item--earned';
+        item.innerHTML = `
+          <div class="gwp-gift__item-media">
+            ${gift.image ? `<img src="${gift.image}" alt="${gift.title || 'Gift'}">` : ''}
+          </div>
+          <div class="gwp-gift__item-info">
+            <p class="gwp-gift__item-title">${gift.title || 'Free gift'}</p>
+            <p class="gwp-gift__item-price"><s>${this.#formatMoney(gift.compareAtPrice)}</s> <strong>FREE</strong></p>
+          </div>
+        `;
+        section.appendChild(item);
+      });
+
+      body.appendChild(section);
+    }
+
+    if (locked.length) {
+      const section = document.createElement('section');
+      const heading = document.createElement('h3');
+      heading.textContent = 'Unlock a free gift';
+      section.appendChild(heading);
+
+      locked.forEach((gift) => {
+        const item = document.createElement('article');
+        item.className = 'gwp-gift__item gwp-gift__item--locked';
+
+        let progressHTML = '';
+
+        // Threshold progress bar
+        if (gift.type === 'threshold' && typeof gift.threshold === 'number') {
+          const spent = Math.min(cartTotalPrice, gift.threshold);
+          const remaining = Math.max(gift.threshold - cartTotalPrice, 0);
+          const percent = Math.max(
+            0,
+            Math.min(100, Math.round((spent / gift.threshold) * 100))
+          );
+
+          const label =
+            remaining > 0
+              ? `Spend ${this.#formatMoney(remaining)} more for a free Gift!`
+              : `You've unlocked this gift!`;
+
+          progressHTML = `
+            <div class="gwp-gift__progress">
+              <div class="gwp-gift__progress-track">
+                <div class="gwp-gift__progress-bar" style="width:${percent}%"></div>
+              </div>
+              <p class="gwp-gift__progress-label">${label}</p>
+            </div>
+          `;
+        }
+
+        item.innerHTML = `
+          <div class="gwp-gift__item-media">
+            ${gift.image ? `<img src="${gift.image}" alt="${gift.title || 'Gift'}">` : ''}
+          </div>
+          <div class="gwp-gift__item-info">
+            <p class="gwp-gift__item-title">${gift.title || 'Free gift'}</p>
+            ${progressHTML}
+          </div>
+        `;
+
+        section.appendChild(item);
+      });
+
+      body.appendChild(section);
+    }
+
+
+    if (earned.length && !sessionStorage.getItem('gwpDialogShown')) {
+      this.showDialog();
+      sessionStorage.setItem('gwpDialogShown', 'true');
+    }
+  };
+
+}
+
+if (!customElements.get('gwp-dialog')) {
+  customElements.define('gwp-dialog', GWPGiftDialog);
+}
+
+</script>
+
+<style>
+/* Floating gift button */
+.gwp-gift__fab {
+  position: fixed;
+  top: 50%;
+  left: 1.5rem;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: #111;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+
+.gwp-gift__badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #e53935;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+/* Dialog positioning + backdrop */
+.gwp-gift__dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.gwp-gift__dialog {
+  position: fixed;
+  margin: 0;
+  top: 50%;
+  left: 5.5rem;            /* to the right of the icon */
+  transform: translateY(-50%);
+  max-width: 380px;
+  width: 90vw;
+  background: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+}
+
+/* Dialog inner layout */
+.gwp-gift__dialog-inner {
+  position: relative;
+  padding: 1.5rem;
+}
+
+.gwp-gift__dialog-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.gwp-gift__dialog-body section {
+  margin-bottom: 1.5rem;
+}
+
+.gwp-gift__dialog-body h3 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Horizontal product card */
+.gwp-gift__item {
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+  gap: 1rem;
+}
+
+.gwp-gift__item + .gwp-gift__item {
+  margin-top: 1rem;
+}
+
+.gwp-gift__item-media {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f7f7f7;
+}
+
+.gwp-gift__item-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0;
+}
+
+.gwp-gift__item-info {
+  flex: 1 1 auto;
+}
+
+.gwp-gift__item-title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.gwp-gift__item-price,
+.gwp-gift__item-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+/* Progress bar styling similar to cart banner */
+.gwp-gift__progress {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.gwp-gift__progress-track {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #f3f3f3;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+
+.gwp-gift__progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #f6a4d5; /* your pink */
+}
+
+.gwp-gift__progress-label {
+  margin: 0;
+  font-size: 0.9rem;
+}
+@media screen and (max-width: 749px) {
+  .gwp-gift__dialog {
+    top: calc(50% + 130px);
+    left: 1.5rem;
+  }
+}
+</style>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "Inject GWP",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable",
+      "label": "Enable GWP"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_dialog",
+      "label": "Enable GWP Dialog"
+    }
+  ]
+}
+{% endschema %}

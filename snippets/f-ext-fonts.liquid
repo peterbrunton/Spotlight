@@ -1,0 +1,75 @@
+{% # theme-check-disable %}
+
+{% doc %}
+  Font loading for custom brand fonts and Shopify font picker fonts.
+  Custom fonts configured via settings.custom_body_font / settings.custom_heading_font (woff2 CDN URLs).
+{% enddoc %}
+
+{%- if settings.custom_body_font != blank or settings.custom_heading_font != blank -%}
+  <link
+    rel="preconnect"
+    href="https://cdn.shopify.com"
+    crossorigin
+  >
+{%- endif -%}
+
+{%- unless settings.type_body_font.system?
+  and settings.type_subheading_font.system?
+  and settings.type_heading_font.system?
+  and settings.type_accent_font.system?
+-%}
+  <link
+    rel="preconnect"
+    href="https://fonts.shopifycdn.com"
+    crossorigin
+  >
+{%- endunless -%}
+
+{%- if settings.custom_body_font != blank -%}
+  {{ settings.custom_body_font | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+{%- endif -%}
+{%- if settings.custom_heading_font != blank -%}
+  {{ settings.custom_heading_font | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+{%- endif -%}
+
+{%- unless settings.type_body_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_body_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_subheading_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_subheading_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_heading_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_heading_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_accent_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_accent_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{% # theme-check-enable %}

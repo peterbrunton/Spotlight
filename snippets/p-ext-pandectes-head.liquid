@@ -1,0 +1,11 @@
+{%- comment -%}
+  Snippet: soc-pandectes-head.liquid
+  Usage: {%- render 'p-ext-pandectes-head' -%}
+
+  Loads the Pandectes cookie compliance rules script.
+  Must be parser-blocking and rendered before stylesheets so Pandectes
+  can suppress blocked resources before they load.
+  The file pandectes-rules.js is managed by the Pandectes app — do not rename.
+{%- endcomment -%}
+<link rel="preload" href="{{ 'pandectes-rules.js' | file_url }}" as="script">
+<script src="{{ 'pandectes-rules.js' | file_url }}"></script>

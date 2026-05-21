@@ -1,0 +1,18 @@
+{%- comment -%}
+  Snippet: soc-body-classes.liquid
+  Usage: class="{% render 'b-ext-body-classes' %}"
+
+  Outputs additional body classes for Spotlight page-level CSS targeting.
+  Adds a page-- class based on template name and handle, used in soc-styles.css
+  for page-specific overrides (e.g. hiding tabs on replacement head product pages).
+{%- endcomment -%}
+page--{%- case template.name -%}
+  {%- when 'index' -%}home
+  {%- when 'cart' -%}cart
+  {%- when 'product' -%}product-{{ product.handle }}
+  {%- when 'collection' -%}collection-{{ collection.handle }}
+  {%- when 'blog' -%}blog-{{ blog.handle }}
+  {%- when 'article' -%}article-{{ article.handle }}
+  {%- when 'page' -%}page-{{ page.handle }}
+  {%- else -%}{{ template.name }}
+{%- endcase -%}

@@ -1,0 +1,572 @@
+{% doc %}
+  Renders all global scripts, module preloads, and importmaps for the theme.
+
+  @param {object} [product] - The product object, available on product pages.
+{% enddoc %}
+
+{%- comment -%}
+  ============================================================
+  Third-party resource hints — non-blocking, improve connection speed
+{%- endcomment -%}
+
+<link rel="dns-prefetch" href="//www.googletagmanager.com">
+<link rel="dns-prefetch" href="//static.klaviyo.com">
+<link rel="dns-prefetch" href="//a.klaviyo.com">
+<link rel="dns-prefetch" href="//manage.kmail-lists.com">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="dns-prefetch" href="//www.clarity.ms">
+
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin fetchpriority="high">
+<link rel="preconnect" href="https://static.klaviyo.com" crossorigin>
+<link rel="preconnect" href="https://a.klaviyo.com" crossorigin>
+
+{%- comment -%}
+  ============================================================
+  Google site verification
+{%- endcomment -%}
+<meta name="google-site-verification" content="06dcUOE3co1aGUnoe_sCE2bfv54HavLrbkyw0dek-90">
+
+{%- comment -%}
+  ============================================================
+  Trailing slash redirect — must run immediately
+{%- endcomment -%}
+<script>
+  if (window.location.pathname !== '/' && window.location.pathname.slice(-1) === '/') {
+    window.location.href = window.location.href.slice(0, -1);
+  }
+</script>
+
+{%- comment -%}
+  ============================================================
+  Adaptive render-blocker patch — removes the view-transition render-blocker
+  immediately on slow connections rather than waiting the base 1800ms timeout.
+  Loaded without async so it runs synchronously in <head> before the base
+  view-transitions.js (which is async) has a chance to execute.
+{%- endcomment -%}
+{% if settings.page_transition_enabled or settings.transition_to_main_product %}
+  <script>
+    (function () {
+      const connection = navigator.connection;
+      const isSlowConnection =
+        connection && (connection.saveData || ['slow-2g', '2g', '3g'].includes(connection.effectiveType));
+      if (isSlowConnection) {
+        document.getElementById('view-transition-render-blocker')?.remove();
+      }
+    })();
+  </script>
+{% endif %}
+
+{%- comment -%}
+  ============================================================
+  Trustpilot
+{%- endcomment -%}
+
+<script type="text/javascript" src="//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" defer></script>
+<script>
+  (function () {
+    function initWidget(el) {
+      if (window.Trustpilot) {
+        window.Trustpilot.loadFromElement(el, true);
+      } else {
+        document.querySelector('[src*="tp.widget.bootstrap"]')?.addEventListener('load', () => {
+          window.Trustpilot.loadFromElement(el, true);
+        });
+      }
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          el.setAttribute('data-template-id', el.dataset.tpTemplate);
+          el.setAttribute('data-businessunit-id', el.dataset.tpBu);
+          el.setAttribute('data-token', el.dataset.tpToken);
+          el.setAttribute('data-sku', el.dataset.tpSku);
+          el.classList.add('trustpilot-widget');
+          initWidget(el);
+          io.unobserve(el);
+        });
+      },
+      { rootMargin: '200px' }
+    );
+
+    function observeAll() {
+      document.querySelectorAll('.tp-lazy:not(.trustpilot-widget)').forEach((el) => io.observe(el));
+    }
+
+    // Watch for new cards added by infinite scroll
+    const mo = new MutationObserver((mutations) => {
+      let hasNew = false;
+      for (const m of mutations) {
+        for (const node of m.addedNodes) {
+          if (
+            node instanceof HTMLElement &&
+            (node.classList?.contains('tp-lazy') || node.querySelector?.('.tp-lazy'))
+          ) {
+            hasNew = true;
+            break;
+          }
+        }
+        if (hasNew) break;
+      }
+      if (hasNew) observeAll();
+    });
+
+    function init() {
+      observeAll();
+      mo.observe(document.body, { childList: true, subtree: true });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    document.addEventListener('shopify:section:load', observeAll);
+  })();
+</script>
+
+{%- comment -%}
+  ============================================================
+  Klaviyo — idempotent loader, initialises queue before library arrives
+{%- endcomment -%}
+<script>
+  window._learnq = window._learnq || [];
+  (function loadKlaviyo() {
+    if (window.Klaviyo && window.Klaviyo.api) return;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=Vqfqg4';
+    document.head.appendChild(s);
+  })();
+</script>
+
+{%- comment -%}
+  ============================================================
+  GTM / Google Ads / Clarity — deferred until user interaction or idle
+{%- endcomment -%}
+<script>
+  window.dataLayer = window.dataLayer || [];
+  window.clarity =
+    window.clarity ||
+    function () {
+      (window.clarity.q = window.clarity.q || []).push(arguments);
+    };
+
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+
+  (function () {
+    var scriptsLoaded = false;
+    var userInteracted = false;
+    var pageLoaded = document.readyState === 'complete';
+
+    if (!pageLoaded) {
+      window.addEventListener('load', function () {
+        pageLoaded = true;
+        checkAndLoad();
+      });
+    }
+
+    function loadAllScripts() {
+      if (scriptsLoaded) return;
+      scriptsLoaded = true;
+
+      var gtmScript = document.createElement('script');
+      gtmScript.async = true;
+      gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-M5CCBHK';
+      (document.body || document.head).appendChild(gtmScript);
+
+      var gtagScript = document.createElement('script');
+      gtagScript.async = true;
+      gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-816577827';
+      gtagScript.onload = function () {
+        gtag('js', new Date());
+        gtag('config', 'AW-816577827');
+      };
+      (document.body || document.head).appendChild(gtagScript);
+      setTimeout(function () {
+        var clarityScript = document.createElement('script');
+        clarityScript.async = true;
+        clarityScript.src = 'https://www.clarity.ms/tag/rc977bj7kf';
+        (document.body || document.head).appendChild(clarityScript);
+      }, 25);
+    }
+
+    function checkAndLoad() {
+      if (userInteracted && pageLoaded) loadAllScripts();
+    }
+
+    function onUserInteraction() {
+      userInteracted = true;
+      checkAndLoad();
+    }
+
+    ['scroll', 'click', 'mousemove', 'keydown', 'touchstart'].forEach(function (event) {
+      document.addEventListener(event, onUserInteraction, { passive: true, once: true });
+    });
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(
+        function () {
+          if (!scriptsLoaded) {
+            pageLoaded = true;
+            userInteracted = true;
+            loadAllScripts();
+          }
+        },
+        { timeout: 2000 }
+      );
+    } else {
+      setTimeout(function () {
+        if (!scriptsLoaded) {
+          pageLoaded = true;
+          userInteracted = true;
+          loadAllScripts();
+        }
+      }, 2000);
+    }
+  })();
+</script>
+{%- comment -%} GTM noscript fallback — must render immediately after <body> per GTM spec {%- endcomment -%}
+<noscript
+  ><iframe
+    src="https://www.googletagmanager.com/ns.html?id=GTM-M5CCBHK"
+    height="0"
+    width="0"
+    style="display:none;visibility:hidden"
+  ></iframe
+></noscript>
+
+{%- comment -%}
+  ============================================================
+  AdRoll — pass customer data when logged in
+{%- endcomment -%}
+{% if customer %}
+  <script>
+    adroll_email = '{{ customer.email }}';
+    adroll_user_id = '{{ customer.id }}';
+    adroll_accepts_marketing = '{{ customer.accepts_marketing }}';
+  </script>
+{% endif %}
+
+{%- comment -%}
+  ============================================================
+  instant.page — prefetches pages on hover for faster navigation
+{%- endcomment -%}
+<script
+  src="//instant.page/5.2.0"
+  type="module"
+  integrity="sha384-jnZyxPjiipYXnSU0ygqeac2q7CVYMbh84q0uHVRRxEtvFPiQYbXWUorga2aqZJ0z"
+></script>
+
+<script type="importmap">
+  {
+    "imports": {
+      "@theme/overflow-list": "{{ 'overflow-list.js' | asset_url }}",
+      "@theme/product-title": "{{ 'product-title-truncation.js' | asset_url }}",
+      "@theme/component": "{{ 'component.js' | asset_url }}",
+      "@theme/dialog": "{{ 'dialog.js' | asset_url }}",
+      "@theme/events": "{{ 'events.js' | asset_url }}",
+      "@theme/focus": "{{ 'focus.js' | asset_url }}",
+      "@theme/morph": "{{ 'morph.js' | asset_url }}",
+      "@theme/paginated-list": "{{ 'paginated-list.js' | asset_url }}",
+      "@theme/performance": "{{ 'performance.js' | asset_url }}",
+      "@theme/product-form": "{{ 'product-form.js' | asset_url }}",
+      "@theme/recently-viewed-products": "{{ 'recently-viewed-products.js' | asset_url }}",
+      "@theme/scrolling": "{{ 'scrolling.js' | asset_url }}",
+      "@theme/section-renderer": "{{ 'section-renderer.js' | asset_url }}",
+      "@theme/section-hydration": "{{ 'section-hydration.js' | asset_url }}",
+      "@theme/money-formatting": "{{ 'money-formatting.js' | asset_url }}",
+      "@theme/utilities": "{{ 'utilities.js' | asset_url }}",
+      "@theme/variant-picker": "{{ 'variant-picker.js' | asset_url }}",
+      "@theme/media-gallery": "{{ 'media-gallery.js' | asset_url }}",
+      "@theme/quick-add": "{{ 'quick-add.js' | asset_url }}",
+      "@theme/paginated-list-aspect-ratio": "{{ 'paginated-list-aspect-ratio.js' | asset_url }}",
+      "@theme/popover-polyfill": "{{ 'popover-polyfill.js' | asset_url }}",
+      "@theme/component-quantity-selector": "{{ 'component-quantity-selector.js' | asset_url }}",
+      "@theme/comparison-slider": "{{ 'comparison-slider.js' | asset_url }}",
+      "@theme/sticky-add-to-cart": "{{ 'sticky-add-to-cart.js' | asset_url }}",
+      "@theme/fly-to-cart": "{{ 'fly-to-cart.js' | asset_url }}"
+    }
+  }
+</script>
+
+<script
+  src="{{ 'view-transitions.js' | asset_url }}"
+  async
+  {% if settings.page_transition_enabled or settings.transition_to_main_product %}
+    blocking="render"
+  {% endif %}
+></script>
+
+<link
+  rel="modulepreload"
+  href="{{ 'utilities.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'component.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'section-renderer.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'section-hydration.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'morph.js' | asset_url }}"
+  fetchpriority="low"
+>
+
+{% if template.name == 'collection' or template.name == 'search' %}
+  <link
+    rel="modulepreload"
+    href="{{ 'paginated-list-aspect-ratio.js' | asset_url }}"
+    fetchpriority="low"
+  >
+  <link
+    rel="modulepreload"
+    href="{{ 'paginated-list.js' | asset_url }}"
+    fetchpriority="low"
+  >
+
+  <link
+    rel="modulepreload"
+    href="{{ 'product-title-truncation.js' | asset_url }}"
+    fetchpriority="low"
+  >
+{% endif %}
+
+<link
+  rel="modulepreload"
+  href="{{ 'focus.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'recently-viewed-products.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'scrolling.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'events.js' | asset_url }}"
+  fetchpriority="low"
+>
+<script
+  src="{{ 'popover-polyfill.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'overflow-list.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'quick-add.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+{% if settings.show_add_discount_code %}
+  <script
+    src="{{ 'cart-discount.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+
+<script
+  src="{{ 'dialog.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'variant-picker.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-card.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-form.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'fly-to-cart.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'accordion-custom.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'media.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-price.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-sku.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-title-truncation.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-inventory.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'show-more.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'slideshow.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'layered-slideshow.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'anchored-popover.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'floating-panel.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'video-background.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'component-quantity-selector.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'media-gallery.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'rte-formatter.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'volume-pricing.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'price-per-item.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'volume-pricing-info.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% if localization.available_countries.size > 1 or localization.available_languages.size > 1 %}
+  <script
+    src="{{ 'localization.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+
+{% if template == 'product' or template.name == 'product' or request.page_type == 'product' %}
+  <script
+    src="{{ 'fly-to-cart.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'sticky-add-to-cart.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script type="module">
+    import { RecentlyViewed } from '@theme/recently-viewed-products';
+    RecentlyViewed.addProduct('{{ product.id }}');
+  </script>
+{% endif %}
+
+<script
+  src="{{ 'auto-close-details.js' | asset_url }}"
+  defer="defer"
+></script>
+
+{%- comment -%}
+  ============================================================
+  Custom JS modules
+{%- endcomment -%}
+<script src="{{ 't-ext-tabs.js' | asset_url }}" type="module" fetchpriority="low"></script>
+<script src="{{ 'k-ext-klarna.js' | asset_url }}" type="module" fetchpriority="low"></script>
+<script src="{{ 'k-ext-klaviyo-signup.js' | asset_url }}" type="module" fetchpriority="low"></script>
+
+<script>
+  const Theme = {
+    translations: {
+      placeholder_image: `{{ 'content.placeholder_image' | t }}`,
+      added: `{{ 'actions.added' | t }}`,
+      recipient_form_fields_visible: `{{ 'content.recipient_form_fields_visible' | t }}`,
+      recipient_form_fields_hidden: `{{ 'content.recipient_form_fields_hidden' | t }}`,
+      recipient_form_error: `{{ 'content.recipient_form_error' | t }}`,
+      items_added_to_cart_one: `{{ 'content.items_added_to_cart.one' | t }}`,
+      items_added_to_cart_other: `{{ 'content.items_added_to_cart.other' | t }}`,
+      cart_count: `{{ 'accessibility.cart_count' | t }}`,
+    },
+    routes: {
+      cart_add_url: '{{ routes.cart_add_url | append: '.js' }}',
+      cart_change_url: '{{ routes.cart_change_url }}',
+      cart_update_url: '{{ routes.cart_update_url }}',
+      cart_url: '{{ routes.cart_url }}',
+      predictive_search_url: '{{ routes.predictive_search_url }}',
+      search_url: '{{ routes.search_url }}',
+    },
+    template: {
+      name: '{{ template }}',
+    },
+  };
+</script>

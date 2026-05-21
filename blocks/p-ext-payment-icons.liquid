@@ -1,0 +1,112 @@
+{%- assign block_settings = block.settings -%}
+
+<div
+  class="
+    payment-icons
+    spacing-style
+  "
+  style="
+    {% render 'spacing-padding', settings: block_settings %}
+    --icon-gap: {{ block_settings.gap }}px;
+    --alignment: {{ block_settings.horizontal_alignment }};
+  "
+  {{ block.shopify_attributes }}
+>
+  {% render 'p-ext-payment-icons',
+    alignment: block_settings.horizontal_alignment,
+    gap: block_settings.gap
+  %}
+</div>
+
+{% schema %}
+{
+  "name": "t:names.payment_icons",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "horizontal_alignment",
+      "label": "t:settings.alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:options.right"
+        },
+        {
+          "value": "space-between",
+          "label": "t:options.space_between"
+        }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "t:settings.gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.payment_icons",
+      "category": "t:categories.footer"
+    }
+  ]
+}
+{% endschema %}

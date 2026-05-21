@@ -1,0 +1,576 @@
+{%- doc -%}
+  Cart drawer upsell snippet - renders a carousel of product cards
+  @param {number} [max_products] - Maximum number of products to show (default: 6)
+  @param {string} [title] - Title for the upsell section
+  @param {boolean} [show_quick_add] - Show quick add buttons (default: true)
+  @param {number} [min_cart_value] - Minimum cart value in cents to show upsells (default: 0)
+{%- enddoc -%}
+
+{% liquid
+  assign upsell_collection = collections[settings.upsell_collection]
+  assign max_products = max_products | default: 6
+  assign title = title | default: settings.upsell_title
+  assign show_quick_add = show_quick_add | default: true
+  assign min_cart_value = min_cart_value | default: 0
+  
+  # Check minimum cart value
+  assign show_upsell = true
+  if min_cart_value > 0 and cart.total_price < min_cart_value
+    assign show_upsell = false
+  endif
+
+  # Try to prioritize upsell from the most recently added cart item
+  assign prioritized_upsell_handle = blank
+  assign prioritized_upsell_message = blank
+  assign prioritized_upsell_discount_amount = 0
+  assign latest_cart_item = cart.items.first
+  if latest_cart_item != blank
+    assign latest_cart_product = latest_cart_item.product
+    assign checkbox_upsell_metafield = latest_cart_product.metafields.custom.checkbox_upsell
+    assign checkbox_upsell_title_metafield = latest_cart_product.metafields.custom.checkbox_upsell_title
+    assign checkbox_upsell_discount_amount_metafield = latest_cart_product.metafields.custom.checkbox_upsell_discount_amount
+
+    if checkbox_upsell_discount_amount_metafield != blank
+      assign prioritized_upsell_discount_amount = checkbox_upsell_discount_amount_metafield.value | default: checkbox_upsell_discount_amount_metafield
+      assign prioritized_upsell_discount_amount = prioritized_upsell_discount_amount | default: 0 | plus: 0 | at_least: 0 | at_most: 100
+    endif
+
+    if checkbox_upsell_metafield != blank
+      assign checkbox_upsell_value = checkbox_upsell_metafield.value
+      assign prioritized_upsell_product = checkbox_upsell_value
+
+      if checkbox_upsell_value.url == blank and checkbox_upsell_value.first != blank
+        assign prioritized_upsell_product = checkbox_upsell_value.first
+      endif
+
+      if prioritized_upsell_product == blank
+        assign prioritized_upsell_product = all_products[checkbox_upsell_value]
+      endif
+
+      if prioritized_upsell_product != blank
+        assign prioritized_product_in_cart = false
+        for item in cart.items
+          if item.product.id == prioritized_upsell_product.id
+            assign prioritized_product_in_cart = true
+            break
+          endif
+        endfor
+
+        unless prioritized_product_in_cart
+          assign prioritized_upsell_handle = prioritized_upsell_product.handle
+          assign prioritized_upsell_message = checkbox_upsell_title_metafield.value | default: checkbox_upsell_title_metafield
+          if prioritized_upsell_message == blank
+            if prioritized_upsell_discount_amount > 0
+              assign prioritized_upsell_message = prioritized_upsell_discount_amount | append: '% off with ' | append: latest_cart_product.title
+            else
+              assign prioritized_upsell_message = 'Special offer with ' | append: latest_cart_product.title
+            endif
+          endif
+        endunless
+      endif
+    endif
+  endif
+  
+  # Get products not in cart from collection - store product handles
+  assign upsell_products = ''
+  assign upsell_count = 0
+  
+  if show_upsell
+    if prioritized_upsell_handle != blank
+      assign upsell_products = prioritized_upsell_handle
+      assign upsell_count = 1
+    endif
+
+    if upsell_collection != blank
+      for product in upsell_collection.products
+        if upsell_count >= max_products
+          break
+        endif
+
+        if product.handle == prioritized_upsell_handle
+          continue
+        endif
+
+        assign product_in_cart = false
+        for item in cart.items
+          if item.product.id == product.id
+            assign product_in_cart = true
+            break
+          endif
+        endfor
+
+        unless product_in_cart
+          if upsell_products == blank
+            assign upsell_products = product.handle
+          else
+            assign upsell_products = upsell_products | append: ',' | append: product.handle
+          endif
+          assign upsell_count = upsell_count | plus: 1
+        endunless
+      endfor
+    endif
+  endif
+%}
+
+{% if show_upsell and upsell_count > 0 %}
+  <div class="cart-drawer-upsell">
+      {% if title != blank %}
+        <span class="cart-drawer-upsell__title">
+          {{ title }}
+        </span>
+      {% endif %}
+      
+      <div class="cart-drawer-upsell__carousel">
+        {% assign product_handles_array = upsell_products | split: ',' %}
+  
+        {% capture slides %}
+          {% for product_handle in product_handles_array %}
+            {% assign product = all_products[product_handle] %}
+            {% if product != blank %}
+  
+              {% liquid
+                if image_aspect_ratio == blank or image_aspect_ratio == 'adapt'
+                  assign ratio = product.featured_image.aspect_ratio
+                else
+                  assign ratio = square
+                endif
+                assign image_width = image_width | default: 1200
+                assign widths = '300, 450, 600, 750, 900, 1050, 1200'
+                assign featured_media_url = product.selected_or_first_available_variant.featured_image | image_url: width: image_width
+                if featured_media_url == blank
+                  assign featured_media_url = product.featured_media.preview_image | image_url: width: image_width
+                endif
+              %}
+              
+              <div
+                class="resource-card"
+                href="{{ product.url }}"
+                data-resource-type="product"
+              >
+                <a
+                  class="resource-card__link"
+                  href="{{ product.url }}"
+                >
+                  <span class="visually-hidden">
+                    {{ product.title }}
+                  </span>
+                </a>
+                <div
+                  class="resource-card__media"
+                  style="--resource-card-aspect-ratio: {{ ratio }};"
+                >
+                    {% assign featured_image = product.featured_image | default: product.featured_media.preview_image %}
+                    {%- if featured_image != blank -%}
+                      {{
+                        featured_image
+                        | image_url: width: image_width
+                        | image_tag:
+                          loading: 'lazy',
+                          class: 'resource-card__image',
+                          widths: widths,
+                          sizes: 'auto',
+                          transitionToProduct: settings.transition_to_main_product,
+                          data-media-id: featured_image.id
+                      }}
+                      {%- if image_hover and product.media.size > 1 -%}
+                        {{
+                          resource.media[1]
+                          | image_url: width: image_width
+                          | image_tag:
+                            loading: 'lazy',
+                            class: 'resource-card__image resource-card__image--secondary',
+                            widths: widths,
+                            sizes: 'auto',
+                            transitionToProduct: settings.transition_to_main_product,
+                            data-media-id: resource.media[1].id
+                        }}
+                      {%- endif -%}
+                    {%- else -%}
+                      <div
+                        aria-hidden="true"
+                        class="resource-card__image-placeholder"
+                      >
+                        {{- product.title | truncate: 60 -}}
+                      </div>
+                    {%- endif -%}
+               </div>
+                <div class="resource-card__content">
+                  <p class="resource-card__title">
+                    {% if product.handle == prioritized_upsell_handle and prioritized_upsell_message != blank %}
+                      {{- prioritized_upsell_message -}}
+                    {% else %}
+                      {{- product.title -}}
+                    {% endif %}
+                  </p>
+
+                  {% liquid
+                    assign card_upsell_discount_amount = product.metafields.custom.checkbox_upsell_discount_amount.value | default: product.metafields.custom.checkbox_upsell_discount_amount | default: 0 | plus: 0
+                    if product.handle == prioritized_upsell_handle and prioritized_upsell_discount_amount > 0
+                      assign card_upsell_discount_amount = prioritized_upsell_discount_amount
+                    endif
+                    assign card_upsell_discount_amount = card_upsell_discount_amount | at_least: 0 | at_most: 100
+                  %}
+
+                  {% if card_upsell_discount_amount > 0 %}
+                    {% render 'u-ext-upsell-discount-price',
+                      product_resource: product,
+                      discount_percentage: card_upsell_discount_amount,
+                      show_unit_price: true
+                    %}
+                  {% else %}
+                    {% render 'p-ext-price', product_resource: product, show_unit_price: true %}
+                  {% endif %}
+                  
+                    {% capture upsell_button_price %}
+                      {% if card_upsell_discount_amount > 0 %}
+                        {% render 'u-ext-upsell-discount-price',
+                          product_resource: product,
+                          discount_percentage: card_upsell_discount_amount,
+                          show_unit_price: true
+                        %}
+                      {% else %}
+                        {% render 'p-ext-price', product_resource: product, show_unit_price: true %}
+                      {% endif %}
+                    {% endcapture %}
+                    
+                    {%- assign product_form_id = 'ProductForm-' | append: product.id -%}
+                    <product-form-component
+                      data-section-id="CartUpsell-{{ product.id }}"
+                      data-product-id="{{ product.id }}"
+                      data-product-url="{{ product.url }}"
+                      on:submit="/handleSubmit"
+                      data-quantity-default="1"
+                      style="position: relative; z-index: 2;"
+                    >
+                      <div
+                        class="visually-hidden"
+                        aria-live="assertive"
+                        role="status"
+                        aria-atomic="true"
+                        ref="liveRegion"
+                      ></div>
+                      {%- form 'product', product, id: product_form_id, novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+                        <input
+                          type="hidden"
+                          name="id"
+                          ref="variantId"
+                          value="{{ product.selected_or_first_available_variant.id }}"
+                        >
+                        <div
+                          class="product-form-buttons spacing-style{% if block.settings.stacking %} product-form-buttons--stacked{% endif %}"
+                          style="{% render 's-ext-spacing-style', settings: block.settings %}"
+                        >
+                
+                          {% liquid
+                            assign class = 'add-to-cart-button button button-unstyled' 
+                            assign id = 'UpsellBuyButtons-ProductSubmitButton-' | append: product.id
+                            assign can_add_to_cart = true
+                            comment
+                            assign add_to_cart_text = 'actions.add_to_cart' | t | append: upsell_button_price
+                            endcomment
+                            assign add_to_cart_text = 'actions.add_to_cart' | t 
+                          %}
+                          {% render 'a-ext-add-to-cart-button',
+                            id: id,
+                            class: class,
+                            can_add_to_cart: can_add_to_cart,
+                            product: product,
+                            add_to_cart_text: add_to_cart_text,
+                            with_add_to_cart_icon: false
+                          %}
+                        
+                          <span
+                            class="product-form-text__error hidden"
+                            ref="addToCartTextError"
+                          >
+                            <span class="svg-wrapper product-form-icon--error">
+                              {{- 'icon-error.svg' | inline_asset_content -}}
+                            </span>
+                          </span>
+              
+                        </div>
+                      {%- endform -%}
+                    </product-form-component>
+                </div>
+              </div>
+  
+              {% unless forloop.last %}|||SLIDE_BREAK|||{% endunless %}
+            {% endif %}
+          {% endfor %}
+        {% endcapture %}
+
+        {% assign slides_array = slides | split: '|||SLIDE_BREAK|||' %}
+
+        {%- if slides_array.size == 1 -%}
+          {%- assign first_slide = slides_array[0] -%}
+          <div class="resource-list__single-card">
+            {{ first_slide }}
+          </div>
+        {%- else -%}
+          {% render 'r-ext-resource-list-carousel',
+            slides: slides_array,
+            slide_count: slides_array.size,
+            slide_width_max: '200px'
+          %}
+        {%- endif -%}
+      </div>
+  </div>
+{% endif %}
+
+{% stylesheet %}
+  .cart-drawer-upsell { 
+    margin-top: auto;
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-background);
+    width: 100%;
+    overflow: visible;
+
+    .cart-drawer-upsell__title {
+      display: inline-block;
+      padding-block-start: var(--padding-sm);
+      padding-block-end: var(--padding-sm);
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .cart-drawer-upsell {
+        padding: 0.75rem;
+      }
+    }
+    
+    .cart-drawer-upsell__carousel {
+      margin-top: var(--padding-sm);  
+      overflow: hidden;
+    }
+
+    .resource-list__single-card {
+      background-color: var(--color-input-border);
+      border-radius: 8px;
+      padding-block-start: var(--padding-xs);
+      padding-block-end: var(--padding-xs);
+      padding-inline-start: var(--padding-sm);
+      padding-inline-end: var(--padding-sm);
+    }
+    
+    .resource-list__carousel {
+      background-color: var(--color-input-border); 
+      border-radius: 8px;
+      padding-block-start: var(--padding-xs);
+      padding-block-end: var(--padding-xs);
+      padding-inline-start: var(--padding-sm);
+      padding-inline-end: var(--padding-sm);
+    }
+    
+    .resource-list__carousel slideshow-slides {
+      /*--slide-width-max: 8.5rem;*/
+      --slide-width-max: 560px;
+      gap: var(--gap-sm);
+      margin-block: 0;
+      padding-block: 0;
+    }
+ 
+    .resource-list__carousel .resource-list__slide {
+      --slide-width: clamp(100px, 100cqw, var(--slide-width-max));
+      /*--slide-width: clamp(100px, 90cqw, var(--slide-width-max));*/
+    }
+  
+    .resource-card {
+      --resource-card-secondary-image-opacity: 0;
+      --resource-card-primary-image-opacity: calc(1 - var(--resource-card-secondary-image-opacity));
+  
+      display: flex;
+      flex-direction: row;
+      gap: var(--padding-sm);
+      position: relative;
+      text-decoration: none;
+      height: 100%;
+      opacity: 0;
+      animation: fadeIn var(--animation-speed-medium) var(--animation-timing-fade-in) forwards;
+    }
+  
+    .resource-card__link {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+  
+    .resource-card__content {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      grid-template-rows: auto auto;        
+      grid-template-areas:
+        "title title button"
+        "price price button";
+      align-items: center;
+      color: var(--color-foreground);
+      padding: var(--padding-sm);
+      width: 100%;
+    }
+  
+    .resource-card__image {
+      aspect-ratio: var(--resource-card-aspect-ratio, auto);
+      object-fit: contain;
+      border-radius: var(--resource-card-corner-radius);
+      opacity: var(--resource-card-primary-image-opacity);
+      max-height: -webkit-fill-available;
+    }
+  
+    .resource-card__image--secondary {
+      position: absolute;
+      top: 0;
+      opacity: var(--resource-card-secondary-image-opacity);
+      border-radius: var(--resource-card-corner-radius);
+    }
+
+    .resource-card__media {
+      height: auto;
+      width: calc(20% - calc(var(--padding-xs) / 2));
+    }
+  
+    .resource-card__media:empty {
+      display: none;
+    }
+  
+    .resource-card__image-placeholder {
+      padding: var(--padding-sm);
+      font-size: var(--font-size--lg);
+      line-height: var(--line-height--display-loose);
+      word-break: break-word;
+      background-color: rgb(from var(--color-foreground) r g b / 5%);
+      aspect-ratio: var(--resource-card-aspect-ratio, auto);
+      border-radius: var(--resource-card-corner-radius);
+      color: var(--color-foreground);
+    }
+  
+    .resource-card__title {
+      grid-area: title;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      line-height: 1;
+      align-self: end;
+    }
+
+    [ref="priceContainer"] {
+      grid-area: price;
+    }
+  
+    .resource-card__title.paragraph {
+      line-height: 1.3;
+    }
+
+    .resource-card--overlay {
+      height: 100%;
+  
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 50% 0 0;
+        background: var(--gradient-image-overlay);
+        border-radius: var(--resource-card-corner-radius);
+        pointer-events: none;
+        z-index: var(--layer-flat);
+      }
+    }
+  
+    .resource-card--overlay .resource-card__image {
+      height: 100%;
+    }
+  
+    .resource-card--overlay .resource-card__content {
+      position: absolute;
+      inset: auto 0 0;
+      padding: var(--padding-lg) var(--padding-lg) var(--padding-sm);
+      z-index: var(--layer-raised);
+    }
+  
+    .resource-card--overlay .resource-card__title {
+      color: var(--color-white);
+    }
+  
+    /* Collection images */
+    .resource-card__image-wrapper {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--gap-2xs);
+    }
+  
+    .resource-card__collection-image {
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: calc(var(--card-corner-radius) - (var(--padding-xs) / 2));
+    }
+  
+    .resource-card__subtext {
+      color: rgba(from var(--color-foreground) r g b / var(--opacity-subdued-text));
+      margin-block-start: 0;
+    }
+  
+    .resource-card__subtext.paragraph {
+      font-size: var(--font-size--body-sm);
+      line-height: var(--line-height--body-tight);
+      color: rgba(from var(--color-foreground) r g b / var(--opacity-subdued-text));
+    }
+  
+    .resource-card:has(.resource-card__image--secondary) {
+      &:hover,
+      &:focus {
+        --resource-card-secondary-image-opacity: 1;
+      }
+    }
+
+    .product-form-buttons add-to-cart-component {
+      width: 100%;
+    }
+    
+    product-form-component {
+      grid-area: button
+    }
+
+    .product-form-buttons {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    
+    .product-form-buttons button {
+      background-color: var(--color-background);
+      white-space: nowrap;
+      width: auto;
+    }
+
+    .add-to-cart-button {
+      font-size: 0.95rem;
+      border-radius: 5px;
+      border: 1px solid;
+      height: auto;
+    }
+    .add-to-cart-text__content div {
+      display: inline-flex;
+      padding-left: 5px;
+    }
+    .add-to-cart-text__content [role="group"]:has(.compare-at-price) {
+      display: none;
+    }
+    slideshow-arrows .slideshow-control {
+      opacity: 1;
+      margin-right: -30px;
+      margin-left: -30px;
+      min-height: var(--minimum-touch-target);
+      min-width: var(--minimum-touch-target);
+    }
+    .resource-list__carousel slideshow-arrows {
+      padding-inline: 0 0;
+    }
+    .resource-list__carousel .slideshow-control[disabled] {
+      display: block;
+      opacity: 0.5; 
+    }
+
+    .product-form-buttons button {
+      padding-inline: var(--padding-lg);
+      padding-block: var(--padding-md);
+    }
+  }
+{% endstylesheet %}

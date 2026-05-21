@@ -1,0 +1,233 @@
+{%- comment -%}
+────────────────────────────────────────────
+PRODUCT VARIATIONS — METAOBJECT VERSION
+────────────────────────────────────────────
+{%- endcomment -%}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign variation_title = block_settings.variation_title
+  assign product_variation_count = 0
+  assign has_product_variations = false
+  assign product_variations = blank
+  assign variation_group = blank
+  assign source_product = blank
+
+  if closest.product != blank
+    assign source_product = closest.product
+  elsif product != blank
+    assign source_product = product
+  endif
+
+  if block.settings.variation_group != blank
+    assign variation_group = block.settings.variation_group.value
+  elsif source_product != blank and source_product.metafields.custom.variation_group != blank
+    assign variation_group = source_product.metafields.custom.variation_group.value
+  endif
+
+  if variation_group != blank
+    assign product_variations = variation_group.products.value
+
+    if variation_group.variation_type != blank
+      assign variation_title = variation_group.variation_type
+    endif
+  endif
+
+  for item in product_variations
+    assign product_variation_count = product_variation_count | plus: 1
+  endfor
+
+  if product_variation_count > 0
+    assign has_product_variations = true
+  endif
+
+  if template != 'product' and source_product != blank
+    if source_product.metafields.soc_meta.product_variations_overlay == false
+      assign has_product_variations = false
+    endif
+  endif
+-%}
+
+{% if has_product_variations %}
+  <product-variations
+    class="product-variations-overlay spacing-style"
+    style="{% render 's-ext-spacing-style', settings: block.settings %}"
+  >
+    <div class="product-variations-scroll">
+      <ul class="list-unstyled flex gap-xs align-center text-nowrap">
+        {% for variation_product in product_variations %}
+          {% assign is_current = false %}
+          {% if source_product != blank and variation_product.id == source_product.id %}
+            {% assign is_current = true %}
+          {% endif %}
+
+          {% assign variation_available = variation_product.available %}
+          {% assign resolved_variation_title = variation_product.metafields.soc_meta.product_variations_titles.value | default: variation_title %}
+
+          <li>
+            <a href="{{ variation_product.url }}"
+              class="variation-swatch{% if is_current %} variation-swatch--active{% endif %}{% unless variation_available %} variation-swatch--unavailable{% endunless %}"
+              title="{{ resolved_variation_title }}"
+              aria-label="{{ resolved_variation_title }}">
+              {% render 'v-ext-variation-swatch',
+                variation_product: variation_product,
+                variation_title: resolved_variation_title %}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </product-variations>
+{% endif %}
+
+{% stylesheet %}
+  .product-card .product-variations-overlay {
+    position: relative;
+    margin-top: -38px;
+    backdrop-filter: blur(4px);
+    padding: 4px;
+  }
+
+  .product-card .product-variations-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .product-card .product-variations-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  product-variations { width: 100%; display: flex; position: relative; overflow: hidden; gap: 0; flex-shrink: 0; }
+  product-variations-picker-component { display: flex; width: 100%; flex-direction: row; justify-content: var(--product-variations-alignment-mobile); 
+  @media (min-width: 750px) { justify-content: var(--product-variations-alignment); } } 
+  product-variations-picker-component .variation-option { padding-block: calc( var(--product-variations-padding-block-start) + var(--focus-outline-offset) + var(--focus-outline-width) ) calc(var(--product-variations-padding-block-end) + var(--focus-outline-offset) + var(--focus-outline-width)); padding-inline: calc( var(--product-variations-padding-inline-start) + var(--focus-outline-offset) + (1.5 * var(--focus-outline-width)) ) calc(var(--product-variations-padding-inline-end) + var(--focus-outline-offset) + var(--focus-outline-width)); } 
+  .variation-option { overflow-list::part(list) { gap: var(--gap-sm); } overflow-list[defer]::part(list) { flex-wrap: nowrap; } } 
+  .hidden-variations__count { display: flex; align-self: center; align-items: center; justify-content: center; color: rgb(var(--color-foreground-rgb) / var(--opacity-40-60)); background-color: transparent; padding: 0; border: 0; border-radius: 0; &::before { counter-reset: overflow-count var(--overflow-count); content: '+' counter(overflow-count); line-height: 1; cursor: pointer; } } 
+  .hidden-variations__count:hover { color: var(--color-foreground-rgb); } 
+{% endstylesheet %} 
+
+{% schema %}
+{
+  "name": "Product variations",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Display related products as variations"
+    },
+    {
+      "type": "product_list",
+      "id": "product_variations",
+      "label": "Product variations",
+      "limit": 10
+    },
+    {
+      "type": "header",
+      "content": "Variation Settings"
+    },
+    {
+      "type": "text",
+      "id": "variation_title",
+      "label": "Variation type",
+      "default": "Color",
+      "placeholder": "e.g. Color, Size, Style"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "product_variations_alignment",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "select",
+      "id": "product_variations_alignment_mobile",
+      "label": "Mobile alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product variations",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

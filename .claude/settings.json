@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__shopify-dev-mcp__validate_theme",
+      "mcp__shopify-dev-mcp__learn_shopify_api",
+      "Bash(fly logs *)",
+      "Bash(fly status *)"
+    ]
+  }
+}

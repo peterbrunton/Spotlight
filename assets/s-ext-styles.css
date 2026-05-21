@@ -1,0 +1,267 @@
+
+/* Global */
+
+.link {
+  border-bottom: 1px solid currentcolor;
+}
+
+.quantity-selector {
+  background-color: var(--color-input-border);
+}
+
+.button--compact {
+  --button-padding-block: var(--padding-2xs);
+  --button-padding-inline: var(--padding-xs);
+}
+
+summary {
+  padding-block: var(--padding-2xs);
+}
+
+@media screen and (max-width: 749px) {
+  .mobile-column--invert {
+    flex-flow: column-reverse nowrap;
+  }
+}
+
+/* Header Bar background blur */
+.header:not(:has(
+  .mega-menu__list:hover,
+  .menu-list__link[aria-haspopup]:is(:hover, [aria-expanded='true'], [data-animating]),
+  .menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'], [data-animating])
+)) .header__row {
+  background-color: rgba(var(--color-background-rgb) / 0.65);
+  backdrop-filter: blur(16px);
+}
+
+/* Product Card */
+
+.product-card .product-title {
+  flex-grow: 1;
+  display: flex;
+  align-items: flex-start;
+}
+
+.product-card .product-card__content {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Product Card Variations */
+
+.product-card .product-variations-overlay {
+  position: relative;
+  margin-top: -38px;
+  backdrop-filter: blur(4px);
+  padding: 4px;
+}
+
+.product-card .product-variations-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.product-card .product-variations-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Product Card Roundels */
+
+.product-roundels {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1;
+  width: 25%;
+  max-width: 100px;
+  min-width: 40px;
+}
+
+.product-roundel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.product-roundel--image {
+  background: transparent;
+  border-radius: 0;
+}
+
+.product-roundel--image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-roundel--text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.product-roundel__text {
+  font-size: clamp(8px, 2.5vw, 14px);
+  line-height: 1.1;
+  font-weight: 600;
+  padding: 2px;
+  word-break: break-word;
+}
+
+/* make overflow visible for trustpilot */
+
+.product-grid__card.product-grid__card {
+  overflow: visible;
+}
+
+/* Cart Drawer Icon */
+
+.cart-bubble__text {
+    margin-top: -2px;
+}
+
+/* Cart Drawer */
+
+/* Hide unwanted cc icons from cart drawer footer */
+.cart-drawer__summary {
+  .payment-icons__list {
+    .payment-icons__item--american_express,
+    .payment-icons__item--unionpay,
+    .payment-icons__item--maestro {
+      display: none;
+    }
+  }
+
+  .cart-reservation-timer {
+    font-size: var(--cart-font-size--md);
+  }
+
+  .cart-reservation-timer__timewrap {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .cart-reservation-timer__time {
+    display: inline-flex;
+    align-items: baseline;
+
+    /* The big fix */
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+
+    /* Prevent wrapping */
+    white-space: nowrap;
+  }
+
+  /* Make each 2-digit unit a fixed width so 09 -> 10 doesn't shift */
+  .cart-reservation-timer__time .unit {
+    display: inline-block;
+    width: 2ch;          /* exactly 2 characters */
+    text-align: right;   /* keeps it tight */
+  }
+
+  /* Separator has stable width */
+  .cart-reservation-timer__time .sep {
+    display: inline-block;
+    width: 3px;
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .cart-reservation-timer__suffix {
+    white-space: nowrap;
+  }
+
+  .cart__ctas {
+    padding-top: var(--padding-2xs);
+    padding-bottom: var(--padding-2xs);
+  }
+
+  .cart__total-container {
+    font-size: var(--font-size--md);
+
+    .cart__total {
+      font-size: var(--font-size--lg);
+    }
+  }
+
+  .cart__savings-value {
+    color: var(--color-success);
+  }
+
+  .cart__total {
+    border-block-start: 1px solid var(--color-border);
+    padding-top: var(--padding-2xs);
+  }
+}
+
+/* Bundle Highlights */
+
+.text-block--bundle-highlights {
+  background: #f6f6f6;
+  width: 100% !important;
+  padding: 0.5em;
+  border-radius: 0.5rem;
+  margin-top: 0.25rem;
+  flex-grow: 55;
+  justify-content: center;
+
+  ul {
+    padding-left: 20px;
+    list-style-type: " — ";
+  }
+}
+
+
+
+
+
+/* Overrides for publish  [REVIEW and REMOVE] */
+
+.page--product-sonic-pro-heads-white .tabs,
+.page--product-sonic-pro-heads-white .text-block--faq-heading,
+.page--product-sonic-pro-heads-blush-pink .tabs,
+.page--product-sonic-pro-heads-blush-pink .text-block--faq-heading,
+.page--product-sonic-pro-heads-jet-black .tabs,
+.page--product-sonic-pro-heads-jet-black .text-block--faq-heading,
+.page--product-sonic-pro-heads-blush-pink .tabs,
+.page--product-sonic-pro-heads-blush-pink .text-block--faq-heading,
+.page--product-sonic-pro-replacement-heads-electric-blue .tabs,
+.page--product-sonic-pro-replacement-heads-electric-blue .text-block--faq-heading,
+.page--product-sonic-pro-replacement-heads-wisteria-purple .tabs,
+.page--product-sonic-pro-replacement-heads-wisteria-purple .text-block--faq-heading,
+.page--product-spotlight-sonic-brush-replacement-heads .tabs,
+.page--product-spotlight-sonic-brush-replacement-heads .text-block--faq-heading,
+.page--product-graphite-grey-sonic-toothbrush-replacement-heads .tabs,
+.page--product-graphite-grey-sonic-toothbrush-replacement-heads .text-block--faq-heading,
+.page--product-rose-gold-sonic-toothbrush-replacement-heads .tabs,
+.page--product-rose-gold-sonic-toothbrush-replacement-heads .text-block--faq-heading,
+.page--product-pride-sonic-toothbrush-replacement-heads .tabs,
+.page--product-pride-sonic-toothbrush-replacement-heads .text-block--faq-heading,
+.page--product-coral-green-sonic-toothbrush-replacement-heads .tabs,
+.page--product-coral-green-sonic-toothbrush-replacement-heads .text-block--faq-heading,
+.page--product-sonic-toothbrush-replacement-heads-midnight-navy .tabs,
+.page--product-sonic-toothbrush-replacement-heads-midnight-navy .text-block--faq-heading,
+.page--product-sonic-toothbrush-replacement-heads-morning-lilac .tabs,
+.page--product-sonic-toothbrush-replacement-heads-morning-lilac .text-block--faq-heading,
+.page--product-watermelon-pink-sonic-toothbrush-replacement-heads .tabs,
+.page--product-watermelon-pink-sonic-toothbrush-replacement-heads .text-block--faq-heading,
+.page--product-sonic-toothbrush-for-children-replacement-heads .tabs,
+.page--product-sonic-toothbrush-for-children-replacement-heads .text-block--faq-heading {
+  display: none;
+}

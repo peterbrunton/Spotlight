@@ -1,0 +1,27 @@
+{%- doc -%}
+  Outputs a sentinel element when a product is hidden via the
+  search_visibility.hidden metafield. CSS targets the parent list item
+  and hides it from the grid.
+
+  Drop this block once into the product card in the theme editor.
+
+  @example
+  {% content_for 'block', type: '_p-ext-product-visibility', id: 'product-visibility' %}
+{%- enddoc -%}
+
+{%- if closest.product.metafields.search_visibility.hidden.value == true -%}
+  <span class="soc-hidden" aria-hidden="true"></span>
+{%- endif -%}
+
+{% stylesheet %}
+  .product-grid__item:has(.soc-hidden),
+  .resource-list__item:has(.soc-hidden) {
+    display: none;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product Visibility"
+}
+{% endschema %}

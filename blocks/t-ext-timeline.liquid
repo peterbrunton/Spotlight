@@ -1,0 +1,661 @@
+{% comment %}
+------------------------------------------------------------
+IMPORTANT: The contents of this file are auto-generated.
+Avoid editing this file directly.
+
+Compiled from _components/timeline-tabs/section.liquid
+------------------------------------------------------------
+
+Timeline tabs section built for Horizon components.
+{% endcomment %}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+
+<section
+ class="timeline-tabs section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
+ data-timeline-tabs
+>
+ {%- liquid
+ assign tabs_position = section.settings.tabs_position
+ assign tabs_alignment = section.settings.tabs_alignment
+ assign panel_height = section.settings.panel_height
+ assign panel_min_height = 'auto'
+ case panel_height
+ when 'small'
+ assign panel_min_height = '22rem'
+ when 'medium'
+ assign panel_min_height = '28rem'
+ when 'large'
+ assign panel_min_height = '34rem'
+ when 'xlarge'
+ assign panel_min_height = '60rem'
+  endcase
+ -%}
+
+ {%- capture tabs_markup -%}
+ <div class="timeline-tabs__nav timeline-tabs__nav--{{ tabs_alignment }}" role="tablist" aria-label="Timeline tabs">
+ {%- for block in section.blocks -%}
+ {%- assign tab_label = block.settings.tab_label | strip -%}
+ {%- if tab_label == blank -%}
+ {%- assign tab_label = 'Step ' | append: forloop.index -%}
+ {%- endif -%}
+ <button
+ type="button"
+ id="Tab-{{ block.id }}-{{ section.id }}"
+ class="timeline-tabs__tab"
+ role="tab"
+ aria-controls="Panel-{{ block.id }}-{{ section.id }}"
+ aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+ tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+ data-timeline-tab
+ data-timeline-index="{{ forloop.index0 }}"
+ >
+ <span class="timeline-tabs__tab-label">{{ tab_label }}</span>
+ </button>
+ {%- endfor -%}
+ </div>
+ {%- endcapture -%}
+
+ {%- if tabs_position == 'top' -%}
+ <div class="timeline-tabs__controls timeline-tabs__controls--top">
+ {{ tabs_markup }}
+ </div>
+ {%- endif -%}
+
+ <div class="timeline-tabs__content spacing-style" style="{% render 'spacing-padding', settings: section.settings %}; --timeline-panel-min-height: {{ panel_min_height }};">
+ <div class="timeline-tabs__panels" data-timeline-panels>
+ {% content_for 'blocks' %}
+ </div>
+ </div>
+
+ {%- if tabs_position == 'bottom' -%}
+ <div class="timeline-tabs__controls timeline-tabs__controls--bottom">
+ {{ tabs_markup }}
+ </div>
+ {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Timeline tabs",
+  "blocks": [
+    {
+      "type": "t-ext-timeline-step"
+    }
+  ],
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Page"
+        },
+        {
+          "value": "full-width",
+          "label": "Full"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "tabs_position",
+      "label": "Tabs position",
+      "options": [
+        {
+          "value": "bottom",
+          "label": "Below content"
+        },
+        {
+          "value": "top",
+          "label": "Above content"
+        }
+      ],
+      "default": "bottom"
+    },
+    {
+      "type": "select",
+      "id": "tabs_alignment",
+      "label": "Tabs alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "panel_height",
+      "label": "Panel height",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        },
+        {
+          "value": "xlarge",
+          "label": "XLarge"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Timeline tabs",
+      "blocks": {
+        "step_1": {
+          "type": "t-ext-timeline-step",
+          "settings": {
+            "tab_label": "Step one",
+            "media_position": "left"
+          },
+          "blocks": {
+            "content_group": {
+              "type": "g-ext-group",
+              "settings": {
+                "content_direction": "column",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "flex-start",
+                "vertical_alignment": "center",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "flex-start",
+                "vertical_alignment_flex_direction_column": "center",
+                "gap": 12,
+                "width": "fill",
+                "custom_width": 100,
+                "width_mobile": "fill",
+                "custom_width_mobile": 100,
+                "height": "fit",
+                "custom_height": 100,
+                "inherit_color_scheme": true,
+                "color_scheme": "",
+                "background_media": "none",
+                "video_position": "cover",
+                "background_image_position": "cover",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "toggle_overlay": false,
+                "overlay_color": "#00000026",
+                "overlay_style": "solid",
+                "gradient_direction": "to top",
+                "link": "",
+                "open_in_new_tab": false,
+                "placeholder": "",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "step_eyebrow": {
+                  "type": "t-ext-text",
+                  "settings": {
+                    "text": "<p>Step one</p>",
+                    "type_preset": "h6",
+                    "width": "100%",
+                    "alignment": "left"
+                  }
+                },
+                "step_title": {
+                  "type": "t-ext-text",
+                  "settings": {
+                    "text": "<h3>Your first milestone</h3>",
+                    "type_preset": "h3",
+                    "width": "100%",
+                    "alignment": "left"
+                  }
+                },
+                "step_body": {
+                  "type": "t-ext-text",
+                  "settings": {
+                    "text": "<p>Add your timeline details here.</p>",
+                    "type_preset": "paragraph",
+                    "width": "100%",
+                    "alignment": "left"
+                  }
+                }
+              },
+              "block_order": [
+                "step_eyebrow",
+                "step_title",
+                "step_body"
+              ]
+            }
+          },
+          "block_order": [
+            "content_group"
+          ]
+        },
+        "step_2": {
+          "type": "t-ext-timeline-step",
+          "settings": {
+            "tab_label": "Step two",
+            "media_position": "left"
+          },
+          "blocks": {
+            "content_group": {
+              "type": "g-ext-group",
+              "settings": {
+                "content_direction": "column",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "flex-start",
+                "vertical_alignment": "center",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "flex-start",
+                "vertical_alignment_flex_direction_column": "center",
+                "gap": 12,
+                "width": "fill",
+                "custom_width": 100,
+                "width_mobile": "fill",
+                "custom_width_mobile": 100,
+                "height": "fit",
+                "custom_height": 100,
+                "inherit_color_scheme": true,
+                "color_scheme": "",
+                "background_media": "none",
+                "video_position": "cover",
+                "background_image_position": "cover",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "toggle_overlay": false,
+                "overlay_color": "#00000026",
+                "overlay_style": "solid",
+                "gradient_direction": "to top",
+                "link": "",
+                "open_in_new_tab": false,
+                "placeholder": "",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "step_eyebrow": {
+                  "type": "t-ext-text",
+                  "settings": {
+                    "text": "<p>Step two</p>",
+                    "type_preset": "h6",
+                    "width": "100%",
+                    "alignment": "left"
+                  }
+                },
+                "step_title": {
+                  "type": "t-ext-text",
+                  "settings": {
+                    "text": "<h3>Another key point</h3>",
+                    "type_preset": "h3",
+                    "width": "100%",
+                    "alignment": "left"
+                  }
+                },
+                "step_body": {
+                  "type": "t-ext-text",
+                  "settings": {
+                    "text": "<p>Each step supports nested blocks via the group block.</p>",
+                    "type_preset": "paragraph",
+                    "width": "100%",
+                    "alignment": "left"
+                  }
+                }
+              },
+              "block_order": [
+                "step_eyebrow",
+                "step_title",
+                "step_body"
+              ]
+            }
+          },
+          "block_order": [
+            "content_group"
+          ]
+        }
+      },
+      "block_order": [
+        "step_1",
+        "step_2"
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+.timeline-tabs {
+ display: grid;
+ gap: 0;
+ position: relative;
+}
+
+.timeline-tabs__controls {
+ display: block;
+}
+
+.timeline-tabs__controls--top {
+ margin-bottom: 16px;
+}
+
+.timeline-tabs__controls--bottom {
+ margin-top: 16px;
+}
+
+.timeline-tabs__controls--top .timeline-tabs__nav {
+ border-top: 0;
+ border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+ padding-top: 0;
+ padding-bottom: 10px;
+}
+
+.timeline-tabs__content {
+ display: grid;
+}
+
+.timeline-tabs__nav {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 24px;
+ row-gap: 10px;
+ border-top: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+ padding-top: 10px;
+}
+
+.timeline-tabs__nav--left {
+ justify-content: flex-start;
+}
+
+.timeline-tabs__nav--center {
+ justify-content: center;
+}
+
+.timeline-tabs__nav--right {
+ justify-content: flex-end;
+}
+
+.timeline-tabs__tab {
+ appearance: none;
+ border: 0;
+ background: transparent;
+ color: rgb(var(--color-foreground-rgb) / 0.7);
+ cursor: pointer;
+ padding: 4px 0;
+ position: relative;
+ font: inherit;
+}
+
+.timeline-tabs__tab::after {
+ content: "";
+ position: absolute;
+ left: 0;
+ right: 0;
+ bottom: -1px;
+ height: 1.5px;
+ background: currentColor;
+ transform: scaleX(0);
+ transform-origin: left center;
+ transition: transform 0.24s ease;
+}
+
+.timeline-tabs__tab[aria-selected="true"] {
+ color: var(--color-foreground);
+}
+
+.timeline-tabs__tab[aria-selected="true"]::after {
+ transform: scaleX(1);
+}
+
+.timeline-tabs__tab:focus-visible {
+ outline: 2px solid rgb(var(--color-foreground-rgb) / 0.32);
+ outline-offset: 3px;
+}
+
+.timeline-tabs__tab-label {
+ display: block;
+ line-height: 1.1;
+ font-weight: 500;
+ letter-spacing: 0.02em;
+ text-transform: uppercase;
+ font-size: 0.875rem;
+}
+
+.timeline-tabs__panels {
+ position: relative;
+}
+
+.timeline-step {
+ display: grid;
+ grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+ gap: 32px;
+ min-height: var(--timeline-panel-min-height, auto);
+ align-items: stretch;
+ opacity: 1;
+ transform: translateY(0);
+ transition: opacity 0.26s ease, transform 0.26s ease;
+}
+
+.timeline-step[inert] {
+ position: absolute;
+ inset: 0;
+ visibility: hidden;
+ pointer-events: none;
+ opacity: 0;
+ transform: translateY(8px);
+}
+
+.timeline-step--media-right .timeline-step__media {
+ order: 2;
+}
+
+.timeline-step--media-right .timeline-step__content {
+ order: 1;
+}
+
+.timeline-step__media {
+ position: relative;
+ min-height: var(--timeline-media-min-height, 320px);
+ height: var(--timeline-media-height, 100%);
+ border-radius: var(--border-radius, 0px);
+ overflow: hidden;
+}
+
+.timeline-step__media img,
+.timeline-step__media video,
+.timeline-step__media svg {
+ position: absolute;
+ inset: 0;
+ width: 100%;
+ height: 100%;
+ object-fit: cover;
+}
+
+.timeline-step__media--adapt {
+ min-height: 0;
+ height: auto;
+}
+
+.timeline-step__media--adapt img,
+.timeline-step__media--adapt video,
+.timeline-step__media--adapt svg {
+ position: static;
+ display: block;
+ width: 100%;
+ height: auto;
+ object-fit: contain;
+}
+
+.timeline-step__content {
+ display: flex;
+ flex-direction: column;
+ justify-content: flex-start;
+ gap: 10px;
+ padding-block: 6px;
+}
+
+.timeline-step__content--center {
+ justify-content: center;
+}
+
+.timeline-step__content--bottom {
+ justify-content: flex-end;
+}
+
+.timeline-step__group {
+ margin-top: 6px;
+}
+
+.timeline-step--adapt {
+ min-height: auto;
+}
+
+.timeline-step--adapt .timeline-step__content {
+ padding-block: 0;
+}
+
+@media screen and (max-width: 989px) {
+ .timeline-step {
+ grid-template-columns: 1fr;
+ gap: 12px;
+ }
+
+ .timeline-step--media-right .timeline-step__media,
+ .timeline-step--media-right .timeline-step__content {
+ order: initial;
+ }
+
+ .timeline-tabs__nav {
+ overflow-x: auto;
+ flex-wrap: nowrap;
+ scrollbar-width: none;
+ padding-bottom: 2px;
+ gap: 16px;
+ }
+
+ .timeline-step__content {
+ padding-block: 0;
+ }
+
+ .timeline-step__group {
+ margin-top: 0;
+ }
+
+ .timeline-tabs__nav::-webkit-scrollbar {
+ display: none;
+ }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(() => {
+ const initTimelineTabs = (section) => {
+ if (!(section instanceof HTMLElement)) return;
+ if (section.dataset.timelineTabsInitialized === "true") return;
+
+ const tabs = Array.from(section.querySelectorAll("[data-timeline-tab]"));
+ const panels = Array.from(section.querySelectorAll("[data-timeline-panel]"));
+ if (!tabs.length || !panels.length) return;
+
+ const activeTabCount = tabs.filter((tab) => tab.getAttribute("aria-selected") === "true").length;
+ const normalizeInitialSelection = activeTabCount > 1 ? 0 : tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true");
+
+ const activate = (index) => {
+ tabs.forEach((tab, i) => {
+ const active = i === index;
+ tab.setAttribute("aria-selected", String(active));
+ tab.setAttribute("tabindex", active ? "0" : "-1");
+ });
+
+ panels.forEach((panel, i) => {
+ const active = i === index;
+ panel.toggleAttribute("inert", !active);
+ panel.setAttribute("tabindex", active ? "0" : "-1");
+ });
+ };
+
+ tabs.forEach((tab, index) => {
+ tab.addEventListener("click", () => activate(index));
+ tab.addEventListener("keydown", (event) => {
+ const key = event.key;
+ const isPrev = key === "ArrowLeft";
+ const isNext = key === "ArrowRight";
+ const isHome = key === "Home";
+ const isEnd = key === "End";
+ if (!isPrev && !isNext && !isHome && !isEnd) return;
+
+ event.preventDefault();
+
+ let next = index;
+ if (isPrev) next = (index - 1 + tabs.length) % tabs.length;
+ if (isNext) next = (index + 1) % tabs.length;
+ if (isHome) next = 0;
+ if (isEnd) next = tabs.length - 1;
+
+ tabs[next]?.focus();
+ activate(next);
+ });
+ });
+
+ activate(normalizeInitialSelection >= 0 ? normalizeInitialSelection : 0);
+ section.dataset.timelineTabsInitialized = "true";
+ };
+
+ document.querySelectorAll("[data-timeline-tabs]").forEach((section) => initTimelineTabs(section));
+})();
+{% endjavascript %}

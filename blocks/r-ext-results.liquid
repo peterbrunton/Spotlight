@@ -1,0 +1,195 @@
+  
+{% assign customer_results = shop.metaobjects.customer_results.values %}
+
+
+
+{% if customer_results %}
+  <div class="results">
+  {% for result in customer_results %}
+
+    <div class="result">
+      {{ result.media | image_url: width: 600 | image_tag }}
+      <div class="stars">{{ result.stars }}</div>
+      <div class="review">{{ result.text }}</div>
+      <div class="name">{{ result.name }}</div>
+      <div class="product"> 
+        {% assign result_product = all_products[result.product] %}
+        {% capture children %}
+          <div class="product-image">
+            {{ result_product.featured_media | image_url: width: 100 | image_tag }}
+          </div>
+          <div class="product-content">
+            <span class="product-card__title">{{ result_product.title }}</span>
+            {% render 'p-ext-price', product_resource: result_product %}
+
+            {%- assign product_form_id = 'ProductForm-' | append: result_product.id -%}
+            <product-form-component
+              data-section-id="Results-product-{{ result_product.id }}"
+              data-product-id="{{ result_product.id }}"
+              data-product-url="{{ result_product.url }}"
+              on:submit="/handleSubmit"
+              data-quantity-default="1"
+              style="position: relative; z-index: 2;"
+            >
+              <div
+                class="visually-hidden"
+                aria-live="assertive"
+                role="status"
+                aria-atomic="true"
+                ref="liveRegion"
+              ></div>
+              {%- form 'product', result_product, id: product_form_id, novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+                <input
+                  type="hidden"
+                  name="id"
+                  ref="variantId"
+                  value="{{ result_product.selected_or_first_available_variant.id }}"
+                >
+
+                  {% liquid
+                    assign class = 'add-to-cart-button button button-outline' 
+                    assign id = 'BuyButtons-ProductSubmitButton-' | append: result_product.id
+                    assign can_add_to_cart = true
+                    assign add_to_cart_text = 'ADD'
+                  %}
+                  {% render 'a-ext-add-to-cart-button',
+                    id: id,
+                    class: class,
+                    can_add_to_cart: can_add_to_cart,
+                    product: result_product,
+                    add_to_cart_text: add_to_cart_text,
+                    with_add_to_cart_icon: false
+                  %}
+                
+                  <span
+                    class="product-form-text__error hidden"
+                    ref="addToCartTextError"
+                  >
+                    <span class="svg-wrapper product-form-icon--error">
+                      {{- 'icon-error.svg' | inline_asset_content -}}
+                    </span>
+                  </span>
+
+              {%- endform -%}
+            </product-form-component>
+          </div>
+          
+        {% endcapture %}
+        {% render 'p-ext-product-card', product: result_product, children: children %}
+      </div>
+    </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <p>No customer results found.</p>
+{% endif %}
+
+{% stylesheet %}
+.results {
+  max-width: var(--page-width);
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  flex-basis: auto;
+  gap: var(--gap-xs);
+
+
+  .result {
+    flex: 0 0 calc(33.3333% - var(--gap-xs));
+    box-sizing: border-box;
+    padding: 1rem;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    margin-bottom: 2rem;
+    break-inside: avoid;
+    @media (max-width: 750px) {
+      flex: 0 0 100%;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      object-fit: cover; 
+    }
+    
+    .stars {
+      padding: 1rem 0 0.5rem;
+      font-size: 1.5rem;
+      color: #FB5373;
+    }
+
+    .review {
+      padding: 0.5rem 0 1rem;
+    }
+
+    .name {
+      padding: 0.5rem 0;
+    }
+
+    .product {
+      margin: 1rem 0 2rem;
+      padding: 0.65rem;
+      background: #f3f3f3;
+
+      .product-card__content {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        .product-image {
+          flex-basis: 30%;
+          max-width: 100px;
+          align-content: end;
+        }
+        
+        .product-content {
+          flex-basis: 70%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 0.5rem;
+
+          .product-card__title {
+            min-height: 40px;
+            font-weight: 600;
+            align-content: end;
+          }
+
+          product-form-component {
+            --button-padding-block: var(--padding-xs);
+            --button-padding-inline: var(--padding-xl);
+            justify-items: end;
+            margin-top: auto;
+            align-self: flex-end;
+            font-size: 0.9rem;
+            height: auto;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Results",
+  "class": "results",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "carousel_layout",
+      "label": "Carousel display",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Results"
+    }
+  ]
+}
+{% endschema %}

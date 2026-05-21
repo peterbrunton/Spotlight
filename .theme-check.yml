@@ -1,0 +1,12 @@
+ignore:
+  - live-vs-clean/**
+
+# view-transitions.js uses blocking="render" intentionally for page transitions.
+# This is base Horizon code we do not modify (soc- prefix rule).
+ParserBlockingScript:
+  enabled: false
+
+# Horizon intentionally renders the same block ID with different variant params
+# (desktop, mobile, navigation_bar). theme-check doesn't account for variants.
+UniqueStaticBlockId:
+  enabled: false

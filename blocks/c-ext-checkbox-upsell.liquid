@@ -1,0 +1,373 @@
+{%- liquid
+  assign block_settings = block.settings
+  assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id
+  assign upsell_product = block_settings.upsell_product
+-%}
+
+<div
+  id="CheckboxUpsell-{{ block.id }}"
+  class="checkbox-upsell spacing-style"
+  style="{% render 's-ext-spacing-style', settings: block_settings %}"
+  {{ block.shopify_attributes }}
+>
+  {% if block_settings.heading != blank %}
+    <p class="checkbox-upsell__heading">{{ block_settings.heading | escape }}</p>
+  {% endif %}
+
+  {% if upsell_product == blank %}
+    <p class="checkbox-upsell__empty hidden">Select an upsell product in the block settings.</p>
+  {% else %}
+    <ul class="checkbox-upsell__list" role="list">
+      {%- liquid
+        assign variant = upsell_product.selected_or_first_available_variant
+        assign is_available = true
+        if variant == blank or variant.available == false
+          assign is_available = false
+        endif
+
+        assign upsell_discount_amount = block_settings.discount_amount | default: 0 | plus: 0
+        if upsell_discount_amount <= 0
+          assign upsell_discount_amount = product.metafields.custom.checkbox_upsell_discount_amount.value
+          if upsell_discount_amount == blank
+            assign upsell_discount_amount = product.metafields.custom.checkbox_upsell_discount_amount
+          endif
+        endif
+        if upsell_discount_amount <= 0
+          assign upsell_discount_amount = closest.product.metafields.custom.checkbox_upsell_discount_amount.value
+          if upsell_discount_amount == blank
+            assign upsell_discount_amount = closest.product.metafields.custom.checkbox_upsell_discount_amount
+          endif
+        endif
+        if upsell_discount_amount <= 0
+          if upsell_discount_amount == blank
+            assign upsell_discount_amount = upsell_product.metafields.custom.checkbox_upsell_discount_amount.value
+          endif
+          if upsell_discount_amount == blank
+            assign upsell_discount_amount = upsell_product.metafields.custom.checkbox_upsell_discount_amount
+          endif
+        endif
+        assign upsell_discount_amount = upsell_discount_amount | default: 0 | plus: 0 | at_least: 0 | at_most: 100
+
+        assign input_id = 'CheckboxUpsell-' | append: block.id | append: '-' | append: upsell_product.id
+        assign title_id = input_id | append: '-title'
+        assign price_id = input_id | append: '-price'
+
+        assign image = upsell_product.featured_media.preview_image | default: upsell_product.featured_image
+      -%}
+
+      <li class="checkbox-upsell__item{% unless is_available %} is-unavailable{% endunless %}">
+        <div class="checkbox checkbox-upsell__control">
+          <input
+            type="checkbox"
+            id="{{ input_id }}"
+            class="checkbox__input checkbox-upsell__checkbox"
+            value="{{ variant.id }}"
+            data-upsell-checkbox
+            data-upsell-variant-id="{{ variant.id }}"
+            aria-labelledby="{{ title_id }}"
+            aria-describedby="{{ price_id }}"
+            form="{{ product_form_id }}"
+            {% unless is_available %}
+              disabled
+            {% endunless %}
+          >
+          <label class="checkbox__label" for="{{ input_id }}">
+            {{ 'icon-checkmark.svg' | inline_asset_content }}
+            <span class="visually-hidden">Add {{ upsell_product.title }}</span>
+          </label>
+        </div>
+
+        <label class="checkbox-upsell__info" for="{{ input_id }}">
+          <span id="{{ title_id }}" class="checkbox-upsell__title">
+            {{ block_settings.title_prefix }}
+            {% if block_settings.show_title %}
+              {{ upsell_product.title | escape }}
+            {% endif %}
+          </span>
+          <span id="{{ price_id }}" class="checkbox-upsell__price">
+            {% if block_settings.show_price %}
+              {% if upsell_discount_amount > 0 %}
+                {% render 'u-ext-upsell-discount-price',
+                  product_resource: upsell_product,
+                  discount_percentage: upsell_discount_amount,
+                  show_unit_price: true,
+                  show_sale_price_first: true
+                %}
+              {% else %}
+                {% render 'p-ext-price', product_resource: upsell_product, show_unit_price: true, show_sale_price_first: true %}
+              {% endif %}
+            {% endif %}
+          </span>
+        </label>
+
+        {% if block_settings.show_quantity %}
+          <div class="checkbox-upsell__quantity">
+            <input
+              type="number"
+              class="checkbox-upsell__quantity-input"
+              min="1"
+              step="1"
+              value="{{ block_settings.default_quantity | default: 1 }}"
+              data-upsell-quantity
+              data-upsell-id="{{ variant.id }}"
+              form="{{ product_form_id }}"
+              {% unless is_available %}
+                disabled
+              {% endunless %}
+            >
+          </div>
+        {% endif %}
+
+        {% if block_settings.show_image and image != blank %}
+          <div class="checkbox-upsell__image">
+            {{
+              image
+              | image_url: width: 120
+              | image_tag:
+                loading: 'lazy',
+                widths: '60,120',
+                sizes: '60px',
+                alt: image.alt | default: upsell_product.title,
+                class: 'checkbox-upsell__image-img'
+            }}
+          </div>
+        {% endif %}
+      </li>
+    </ul>
+  {% endif %}
+</div>
+
+<script>
+  (() => {
+    const root = document.getElementById('CheckboxUpsell-{{ block.id }}');
+    if (!root) return;
+
+    const checkboxes = root.querySelectorAll('[data-upsell-checkbox]');
+
+    const syncQuantity = (checkbox) => {
+      const variantId = checkbox.dataset.upsellVariantId;
+      const quantityInput = root.querySelector(`[data-upsell-quantity][data-upsell-id="${variantId}"]`);
+      if (!quantityInput) return;
+
+      if (checkbox.checked) {
+        quantityInput.removeAttribute('disabled');
+        const min = Number(quantityInput.min) || 1;
+        const currentValue = Number(quantityInput.value);
+        if (!currentValue || currentValue < min) quantityInput.value = String(min);
+      } else {
+        quantityInput.setAttribute('disabled', 'true');
+      }
+    };
+
+    checkboxes.forEach((checkbox) => {
+      syncQuantity(checkbox);
+      checkbox.addEventListener('change', () => syncQuantity(checkbox));
+    });
+  })();
+</script>
+
+{% stylesheet %}
+  .checkbox-upsell {
+    display: grid;
+    gap: var(--gap-sm);
+  }
+
+  .checkbox-upsell__heading {
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .checkbox-upsell__empty {
+    margin: 0;
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-40-60));
+  }
+
+  .checkbox-upsell__list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .checkbox-upsell__item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 10%);
+    background: rgb(var(--color-background-rgb));
+  }
+
+  .checkbox-upsell__item.is-unavailable {
+    opacity: 0.6;
+  }
+
+  .checkbox-upsell__control {
+    position: relative;
+
+    .checkbox__label {
+      justify-content: center;
+    }
+  }
+
+  .checkbox-upsell__info {
+    display: grid;
+    gap: 0.25rem;
+    cursor: pointer;
+  }
+
+  .checkbox-upsell__title {
+    font-weight: 500;
+  }
+
+  .checkbox-upsell__price {
+    font-size: 0.95em;
+  }
+
+  .checkbox-upsell__quantity {
+    min-width: 3.25rem;
+  }
+
+  .checkbox-upsell__quantity-input {
+    width: 3.25rem;
+    text-align: center;
+    padding: 0.35rem 0.4rem;
+    border-radius: 0.4rem;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 12%);
+    background: var(--input-background-color, rgb(var(--color-background-rgb)));
+  }
+
+  .checkbox-upsell__quantity-input:disabled {
+    background: var(--input-disabled-background-color);
+    color: var(--input-disabled-text-color);
+  }
+
+  .checkbox-upsell__image {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.45rem;
+    overflow: hidden;
+    background: rgb(var(--color-foreground-rgb) / 6%);
+    display: grid;
+    place-items: center;
+  }
+
+  .checkbox-upsell__image-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media screen and (max-width: 749px) {
+    .checkbox-upsell__item {
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto auto;
+    }
+
+    .checkbox-upsell__image {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+    }
+
+    .checkbox-upsell__quantity {
+      grid-column: 2;
+      justify-self: start;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Checkbox upsell",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Add a little extra"
+    },
+    {
+      "type": "text",
+      "id": "title_prefix",
+      "label": "Title prefix",
+      "default": "Add"
+    },
+    {
+      "type": "product",
+      "id": "upsell_product",
+      "label": "Upsell product"
+    },
+    {
+      "type": "text",
+      "id": "discount_amount",
+      "label": "Discount amount (%)",
+      "info": "To align with discount added once in the cart",
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show title",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Show image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "Show quantity",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "default_quantity",
+      "label": "Default quantity",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Checkbox upsell"
+    }
+  ]
+}
+{% endschema %}

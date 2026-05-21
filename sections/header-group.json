@@ -1,54 +1,305 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "type": "header",
-  "name": "t:names.header",
+  "name": "Header",
   "sections": {
     "header_announcements_9jGBFp": {
-      "type": "header-announcements",
+      "type": "h-ext-header-announcements",
       "blocks": {
-        "announcement_BxgCk9": {
-          "type": "_announcement",
+        "announcement_cc4W6M": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
           "settings": {
-            "text": "Welcome to our store",
+            "text": "Free Mini Anti-Stain Powder on €40+",
             "link": "",
-            "font": "var(--font-subheading--family)",
-            "font_size": "0.75rem",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
             "weight": "",
             "letter_spacing": "normal",
-            "case": "none"
+            "case": "none",
+            "icon": "none"
+          },
+          "blocks": {}
+        },
+        "announcement_znbpzp": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "25% Off All Teeth Whitening Products",
+            "link": "shopify://collections/whitening",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "none"
+          },
+          "blocks": {}
+        },
+        "announcement_PckqtE": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "settings": {
+            "text": "Free Delivery On Orders €35+",
+            "link": "",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "",
+            "letter_spacing": "loose",
+            "case": "none",
+            "icon": "discount"
+          },
+          "blocks": {}
+        },
+        "announcement_BxgCk9": {
+          "type": "_a-ext-announcement",
+          "settings": {
+            "text": "Pay in 3 payments with Klarna",
+            "link": "shopify://pages/klarna",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "weight": "",
+            "letter_spacing": "loose",
+            "case": "none",
+            "icon": "love"
+          },
+          "blocks": {}
+        },
+        "announcement_6Bdd4H": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "25% Student Discount",
+            "link": "https://www.studentbeans.com/en-gb/uk/beansid-connect/hosted/spotlight-oral-care/student/4479823c-57c4-461f-a7ed-173b3bb5c001",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "discount"
+          },
+          "blocks": {}
+        },
+        "announcement_xjEwM9": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Free Mini Whitening Powder on Orders €40+",
+            "link": "",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "love"
+          },
+          "blocks": {}
+        },
+        "announcement_b4Rjif": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Free Delivery Today",
+            "link": "",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "love"
+          },
+          "blocks": {}
+        },
+        "announcement_8tQEUf": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Up to 40% off Everything",
+            "link": "",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "love"
+          },
+          "blocks": {}
+        },
+        "announcement_with_countdown_zUJytE": {
+          "type": "_a-ext-announcement-timer",
+          "name": "Announcement Countdown",
+          "disabled": true,
+          "settings": {
+            "text": "Sale ends in",
+            "link": "shopify://collections/sale",
+            "ends_at": "2026-03-03 23:59",
+            "expiration_behavior": "none",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "600",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "none"
+          },
+          "blocks": {}
+        },
+        "announcement_9xwhac": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Buy one KoKo The Koala Gift Set get one FREE!",
+            "link": "shopify://products/koko-the-koala-gift-set",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "discount"
+          },
+          "blocks": {}
+        },
+        "announcement_6UjGnz": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Get Valentine-Ready with Us",
+            "link": "shopify://collections/sale",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "love"
+          },
+          "blocks": {}
+        },
+        "announcement_qhhkQ3": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Save 20% on orders €50+",
+            "link": "",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "weight": "",
+            "letter_spacing": "loose",
+            "case": "none",
+            "icon": "discount"
+          },
+          "blocks": {}
+        },
+        "announcement_9zn8xj": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Free Mini Ultra Whitening Paste on Order €30+",
+            "link": "shopify://collections/all-products",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "weight": "",
+            "letter_spacing": "loose",
+            "case": "none",
+            "icon": "discount"
+          },
+          "blocks": {}
+        },
+        "announcement_TLjmLW": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Free Whitening Kit On Order €50+",
+            "link": "shopify://collections/devices-offer",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "none"
+          },
+          "blocks": {}
+        },
+        "announcement_UpF78n": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "€2 Delivery Today",
+            "link": "shopify://collections/black-friday",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "weight": "",
+            "letter_spacing": "normal",
+            "case": "none",
+            "icon": "none"
+          },
+          "blocks": {}
+        },
+        "announcement_HneTjj": {
+          "type": "_a-ext-announcement",
+          "name": "t:names.announcement",
+          "disabled": true,
+          "settings": {
+            "text": "Extra 10% Off On Orders €75+",
+            "link": "shopify://collections/sale",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "weight": "",
+            "letter_spacing": "loose",
+            "case": "none",
+            "icon": "discount"
           },
           "blocks": {}
         }
       },
       "block_order": [
-        "announcement_BxgCk9"
+        "announcement_cc4W6M",
+        "announcement_znbpzp",
+        "announcement_PckqtE",
+        "announcement_BxgCk9",
+        "announcement_6Bdd4H",
+        "announcement_xjEwM9",
+        "announcement_b4Rjif",
+        "announcement_8tQEUf",
+        "announcement_with_countdown_zUJytE",
+        "announcement_9xwhac",
+        "announcement_6UjGnz",
+        "announcement_qhhkQ3",
+        "announcement_9zn8xj",
+        "announcement_TLjmLW",
+        "announcement_UpF78n",
+        "announcement_HneTjj"
       ],
       "name": "t:names.announcement_bar",
       "settings": {
+        "enable_sticky_header": true,
         "speed": 5,
         "section_width": "page-width",
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-5",
         "divider_width": 1,
-        "padding-block-start": 15,
-        "padding-block-end": 15
+        "padding-block-start": 5,
+        "padding-block-end": 5
       }
     },
     "header_section": {
-      "type": "header",
+      "type": "h-ext-header",
       "blocks": {
         "header-logo": {
-          "type": "_header-logo",
+          "type": "_h-ext-header-logo",
           "static": true,
           "settings": {
             "hide_logo_on_home_page": false,
+            "custom_height": 45,
+            "custom_height_mobile": 35,
             "padding-block-start": 0,
             "padding-block-end": 0,
             "padding-inline-start": 0,
@@ -57,38 +308,61 @@
           "blocks": {}
         },
         "header-menu": {
-          "type": "_header-menu",
+          "type": "_h-ext-header-menu",
           "static": true,
           "settings": {
-            "menu": "main-menu",
-            "color_scheme": "",
-            "type_font_primary_size": "0.875rem",
-            "menu_font_style": "inverse",
-            "type_font_primary_link": "body",
-            "type_case_primary_link": "none",
+            "menu": "mega",
+            "drawer_menu": "sidebar-menu",
             "menu_style": "featured_products",
             "featured_products_aspect_ratio": "4 / 5",
-            "featured_collections_aspect_ratio": "16 / 9",
+            "featured_collections_aspect_ratio": "adapt",
             "image_border_radius": 0,
+            "product_title_case": "default",
+            "collection_title_case": "default",
+            "color_scheme": "",
+            "menu_font_style": "inverse",
+            "type_font_primary_link": "body",
+            "type_font_primary_size": "1.125rem",
+            "type_case_primary_link": "uppercase",
+            "type_font_secondary_link": "body",
+            "type_case_secondary_link": "none",
+            "type_font_tertiary_link": "body",
+            "type_case_tertiary_link": "none",
             "navigation_bar": false,
             "color_scheme_navigation_bar": "",
-            "drawer_accordion": false,
+            "drawer_accordion": true,
             "drawer_accordion_expand_first": false,
             "drawer_dividers": false
+          },
+          "blocks": {}
+        },
+        "header-secondary-menu": {
+          "type": "_h-ext-header-secondary-menu",
+          "static": true,
+          "settings": {
+            "secondary_menu": "secondary-menu",
+            "font": "body",
+            "font_size": "1.125rem",
+            "text_case": "uppercase",
+            "menu_gap": 12
           },
           "blocks": {}
         }
       },
       "settings": {
-        "logo_position": "left",
+        "logo_position": "center",
         "menu_position": "left",
         "menu_row": "top",
+        "secondary_menu_position": "right",
+        "secondary_menu_row": "top",
+        "add_overflow_breakpoint": true,
+        "overflow_breakpoint": 900,
         "show_search": true,
         "search_position": "right",
         "search_row": "top",
-        "show_country": true,
+        "show_country": false,
         "country_selector_style": false,
-        "show_language": true,
+        "show_language": false,
         "localization_font": "heading",
         "localization_font_size": "0.875rem",
         "localization_position": "right",
@@ -109,10 +383,461 @@
         "enable_transparent_header_collection": false,
         "collection_color_scheme": "default"
       }
+    },
+    "inject_gwp_myUehm": {
+      "type": "i-ext-inject-gwp",
+      "blocks": {
+        "gwp_threshold_item_BjDAK4": {
+          "type": "gwp_threshold_item",
+          "disabled": true,
+          "settings": {
+            "product": "mini-anti-stain-tooth-powder",
+            "threshold": 40,
+            "isolate_to_page": false,
+            "page_type": "collection",
+            "page_handle": ""
+          }
+        },
+        "gwp_collection_item_AnWfrE": {
+          "type": "gwp_collection_item",
+          "disabled": true,
+          "settings": {
+            "product": "ultra-whitening-starter-kit-travel-dental-kit-offer",
+            "conditional_collection": "sonic-pro-toothbrushes",
+            "min_quantity": 1,
+            "isolate_to_page": false,
+            "page_type": "page",
+            "page_handle": "exclusive"
+          }
+        },
+        "gwp_threshold_item_bKVLBe": {
+          "type": "gwp_threshold_item",
+          "disabled": true,
+          "settings": {
+            "product": "gwp-mini-ultra-teeth-whitening-professional-toothpaste-25ml",
+            "threshold": 40,
+            "isolate_to_page": false,
+            "page_type": "all",
+            "page_handle": ""
+          }
+        },
+        "gwp_threshold_item_xBRfnT": {
+          "type": "gwp_threshold_item",
+          "disabled": true,
+          "settings": {
+            "product": "mini-teeth-whitening-powder-diamond-pap-copy",
+            "threshold": 40,
+            "isolate_to_page": false,
+            "page_type": "all",
+            "page_handle": ""
+          }
+        },
+        "gwp_collection_item_6URMXJ": {
+          "type": "gwp_collection_item",
+          "disabled": true,
+          "settings": {
+            "product": "gwp-mini-ultra-teeth-whitening-professional-toothpaste-25ml",
+            "conditional_collection": "water-flosser",
+            "min_quantity": 1,
+            "isolate_to_page": false,
+            "page_type": "all",
+            "page_handle": ""
+          }
+        },
+        "gwp_collection_item_b44Fn6": {
+          "type": "gwp_collection_item",
+          "disabled": true,
+          "settings": {
+            "product": "gwp-mini-ultra-teeth-whitening-professional-toothpaste-25ml",
+            "conditional_collection": "sonic-brushes",
+            "min_quantity": 1,
+            "isolate_to_page": false,
+            "page_type": "all",
+            "page_handle": ""
+          }
+        },
+        "gwp_threshold_item_d8W8cp": {
+          "type": "gwp_threshold_item",
+          "disabled": true,
+          "settings": {
+            "product": "sample-mouth-tape",
+            "threshold": 1,
+            "isolate_to_page": false,
+            "page_type": "all",
+            "page_handle": ""
+          }
+        },
+        "gwp_threshold_item_d4bYrL": {
+          "type": "gwp_threshold_item",
+          "disabled": true,
+          "settings": {
+            "product": "ultra-whitening-starter-kit-travel-dental-kit-offer",
+            "threshold": 100,
+            "isolate_to_page": false,
+            "page_type": "all",
+            "page_handle": ""
+          }
+        }
+      },
+      "block_order": [
+        "gwp_threshold_item_BjDAK4",
+        "gwp_collection_item_AnWfrE",
+        "gwp_threshold_item_bKVLBe",
+        "gwp_threshold_item_xBRfnT",
+        "gwp_collection_item_6URMXJ",
+        "gwp_collection_item_b44Fn6",
+        "gwp_threshold_item_d8W8cp",
+        "gwp_threshold_item_d4bYrL"
+      ],
+      "name": "Gift With Purchase",
+      "settings": {
+        "enable": true,
+        "enable_dialog": false
+      }
+    },
+    "section_nRH7nB": {
+      "type": "s-ext-section",
+      "blocks": {
+        "group_PFyFza": {
+          "type": "g-ext-group",
+          "name": "t:names.group",
+          "settings": {
+            "link": "",
+            "open_in_new_tab": false,
+            "content_direction": "row",
+            "vertical_on_mobile": true,
+            "invert_position_on_mobile": false,
+            "horizontal_alignment": "center",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "center",
+            "vertical_alignment_flex_direction_column": "center",
+            "gap": 12,
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "background_media": "none",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "placeholder": "",
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "css_class": ""
+          },
+          "blocks": {
+            "text_p9AB9G": {
+              "type": "t-ext-text",
+              "name": "t:names.text",
+              "disabled": true,
+              "settings": {
+                "text": "<p>Reducing our prices to make better oral care more accessible.</p>",
+                "width": "fit-content",
+                "max_width": "none",
+                "alignment": "left",
+                "type_preset": "custom",
+                "font": "var(--font-body--family)",
+                "font_size": "1.125rem",
+                "line_height": "tight",
+                "letter_spacing": "tight",
+                "case": "uppercase",
+                "wrap": "pretty",
+                "color": "var(--color-foreground-heading)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "css_class": ""
+              },
+              "blocks": {}
+            },
+            "popup_link_f9xJYy": {
+              "type": "p-ext-popup-link",
+              "name": "t:names.popup_link",
+              "settings": {
+                "behavior": "default",
+                "heading": "<span>Reducing our prices to make better oral care more accessible.</span>  Learn more",
+                "type_preset": "paragraph",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "image_8AVaLp": {
+                  "type": "i-ext-image",
+                  "name": "t:names.image",
+                  "settings": {
+                    "image": "shopify://shop_images/Dr-Lisa-_-Vanessa-1-Square-TRANSPARENT-PNG-COMPRESSED.png",
+                    "link": "",
+                    "image_ratio": "adapt",
+                    "width": "fill",
+                    "custom_width": 100,
+                    "width_mobile": "fill",
+                    "custom_width_mobile": 100,
+                    "height": "fit",
+                    "border": "none",
+                    "border_width": 1,
+                    "border_opacity": 100,
+                    "border_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 20,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                },
+                "text_KfdXwM": {
+                  "type": "t-ext-text",
+                  "settings": {
+                    "text": "<p>As dentists, we’ve always believed that professional-level oral care shouldn't be a luxury; it should be a standard. Our mission has always been to provide you with the best tools and formulations to improve your oral health from the comfort of your home.</p>",
+                    "width": "fit-content",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "rte",
+                    "font": "var(--font-body--family)",
+                    "font_size": "1rem",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 16,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0,
+                    "css_class": ""
+                  },
+                  "blocks": {}
+                },
+                "text_c3LYHL": {
+                  "type": "t-ext-text",
+                  "settings": {
+                    "text": "<p>Last week, we took a significant step in fulfilling that mission.<br/><br/><strong>We have permanently reduced prices across our entire store.</strong> From our award-winning Sonic Toothbrushes to our whitening essentials and daily care range, we are making our high-quality products more affordable and accessible than ever before. We believe that when better tools are easier to access, better oral health becomes achievable for everyone.</p>",
+                    "width": "fit-content",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "rte",
+                    "font": "var(--font-body--family)",
+                    "font_size": "1rem",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0,
+                    "css_class": ""
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["image_8AVaLp", "text_KfdXwM", "text_c3LYHL"]
+            }
+          },
+          "block_order": ["text_p9AB9G", "popup_link_f9xJYy"]
+        },
+        "group_6XRzBg": {
+          "type": "g-ext-group",
+          "name": "t:names.group",
+          "disabled": true,
+          "settings": {
+            "link": "shopify://collections/sale",
+            "open_in_new_tab": false,
+            "content_direction": "row",
+            "vertical_on_mobile": true,
+            "invert_position_on_mobile": false,
+            "horizontal_alignment": "center",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center",
+            "gap": 12,
+            "width": "custom",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "background_media": "none",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "placeholder": "",
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "padding-block-start": 20,
+            "padding-block-end": 20,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "css_class": ""
+          },
+          "blocks": {
+            "text_UPLBEV": {
+              "type": "t-ext-text",
+              "name": "t:names.heading",
+              "settings": {
+                "text": "<h3>Hurry, SALE Ends In</h3>",
+                "width": "fit-content",
+                "max_width": "none",
+                "alignment": "center",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "css_class": ""
+              },
+              "blocks": {}
+            },
+            "divider_tAjgE4": {
+              "type": "_d-ext-divider",
+              "name": "t:names.divider",
+              "settings": {
+                "thickness": 1,
+                "corner_radius": "square",
+                "width_percent": 100,
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              },
+              "blocks": {}
+            },
+            "countdown_timer_eUm43q": {
+              "type": "c-ext-countdown-timer",
+              "name": "Countdown Timer",
+              "settings": {
+                "ends_at": "2026-03-04 23:59",
+                "expiration_behavior": "hide",
+                "font_size": 18,
+                "unit_width": 4,
+                "label_spacing": 12,
+                "inherit_color_scheme": true,
+                "color_scheme": "",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "border": "none",
+                "border_width": 2,
+                "border_opacity": 100,
+                "border_radius": 8,
+                "css_class": ""
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "text_UPLBEV",
+            "divider_tAjgE4",
+            "countdown_timer_eUm43q"
+          ]
+        },
+        "countdown_timer_EJdnAD": {
+          "type": "c-ext-countdown-timer",
+          "name": "Countdown Timer",
+          "disabled": true,
+          "settings": {
+            "ends_at": "2025-10-06 23:59",
+            "expiration_behavior": "hide",
+            "font_size": 18,
+            "unit_width": 4,
+            "label_spacing": 12,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "padding-block-start": 20,
+            "padding-block-end": 20,
+            "padding-inline-start": 20,
+            "padding-inline-end": 20,
+            "border": "none",
+            "border_width": 2,
+            "border_opacity": 100,
+            "border_radius": 8,
+            "css_class": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": ["group_PFyFza", "group_6XRzBg", "countdown_timer_EJdnAD"],
+      "custom_css": [],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "row",
+        "vertical_on_mobile": true,
+        "invert_position_on_mobile": false,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "scheme-4",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "hide_on_desktop": false,
+        "hide_on_mobile": false,
+        "padding-block-start": 10,
+        "padding-block-end": 10
+      }
     }
   },
   "order": [
     "header_announcements_9jGBFp",
-    "header_section"
+    "header_section",
+    "inject_gwp_myUehm",
+    "section_nRH7nB"
   ]
 }

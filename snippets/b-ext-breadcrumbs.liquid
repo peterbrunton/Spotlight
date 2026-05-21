@@ -1,0 +1,148 @@
+{%- comment -%}
+  snippets/breadcrumb.liquid
+{%- endcomment -%}
+
+{%- assign block_settings = block.settings -%}
+
+{%- assign delimiter = '|||' -%}
+{%- assign breadcrumb_str = '' -%}
+
+{%- assign breadcrumb_str = '/' | append: '::' | append: 'Home' -%}
+
+{%- assign primary_handle = product.metafields.category.primary -%}
+{%- unless primary_handle -%}
+  {%- assign primary_handle = product.metafields.custom.category_primary -%}
+{%- endunless -%}
+
+{%- unless primary_handle -%}
+  {%- if product.collections.size > 0 -%}
+    {%- assign primary_handle = product.collections.first.handle -%}
+  {%- endif -%}
+{%- endunless -%}
+
+{%- if primary_handle and primary_handle != blank -%}
+  {%- comment %} Clean the handle - remove GID prefix if present {% endcomment %}
+  {%- assign clean_handle = primary_handle -%}
+  {%- if primary_handle contains 'gid://' -%}
+    {%- assign parts = primary_handle | split: '/' -%}
+    {%- assign clean_handle = parts.last -%}
+  {%- endif -%}
+  
+  {%- assign primary_coll = collections[clean_handle] -%}
+  {%- unless primary_coll -%}
+    {%- assign primary_coll = all_collections[clean_handle] -%}
+  {%- endunless -%}
+  
+  {%- if primary_coll -%}
+    {%- assign breadcrumb_str = breadcrumb_str | append: delimiter | append: primary_coll.url | append: '::' | append: primary_coll.title -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- assign secondary_handle = product.metafields.category.secondary -%}
+{%- unless secondary_handle -%}
+  {%- assign secondary_handle = product.metafields.custom.category_secondary -%}
+{%- endunless -%}
+
+{%- if secondary_handle and secondary_handle != blank -%}
+  {%- assign clean_handle = secondary_handle -%}
+  {%- if secondary_handle contains 'gid://' -%}
+    {%- assign parts = secondary_handle | split: '/' -%}
+    {%- assign clean_handle = parts.last -%}
+  {%- endif -%}
+  
+  {%- assign secondary_coll = collections[clean_handle] -%}
+  {%- unless secondary_coll -%}
+    {%- assign secondary_coll = all_collections[clean_handle] -%}
+  {%- endunless -%}
+  
+  {%- if secondary_coll -%}
+    {%- assign breadcrumb_str = breadcrumb_str | append: delimiter | append: secondary_coll.url | append: '::' | append: secondary_coll.title -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- assign tertiary_handle = product.metafields.category.tertiary -%}
+{%- unless tertiary_handle -%}
+  {%- assign tertiary_handle = product.metafields.custom.category_tertiary -%}
+{%- endunless -%}
+
+{%- if tertiary_handle and tertiary_handle != blank -%}
+  {%- assign clean_handle = tertiary_handle -%}
+  {%- if tertiary_handle contains 'gid://' -%}
+    {%- assign parts = tertiary_handle | split: '/' -%}
+    {%- assign clean_handle = parts.last -%}
+  {%- endif -%}
+  
+  {%- assign tertiary_coll = collections[clean_handle] -%}
+  {%- unless tertiary_coll -%}
+    {%- assign tertiary_coll = all_collections[clean_handle] -%}
+  {%- endunless -%}
+  
+  {%- if tertiary_coll -%}
+    {%- assign breadcrumb_str = breadcrumb_str | append: delimiter | append: tertiary_coll.url | append: '::' | append: tertiary_coll.title -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- if product.title -%}
+  {%- assign breadcrumb_str = breadcrumb_str | append: delimiter | append: '::' | append: product.title -%}
+{%- endif -%}
+
+{%- assign items = breadcrumb_str | split: delimiter -%}
+
+{%- if items.size > 1 -%}
+  <nav class="breadcrumb spacing-style" 
+    aria-label="Breadcrumb"
+    style="
+      {% render 'border-override', settings: block_settings %}
+      {% render 's-ext-spacing-style', settings: block_settings %}
+      {% render 'size-style', settings: block_settings %}
+      {{ style }}
+    "
+  >
+    <ol class="breadcrumb-list flex flex-wrap gap-3xs list-unstyled align-center font-size-sm">
+      {%- for item in items -%}
+        {%- assign part = item | split: '::' -%}
+        {%- assign url = part[0] -%}
+        {%- assign title = part[1] -%}
+        
+        {%- comment %} Skip empty titles {% endcomment %}
+        {%- if title and title != blank -%}
+          <li class="flex gap-3xs align-center">
+            {%- if forloop.last -%}
+              <span aria-current="page" style=" font-weight: 600;">{{ title }}</span>
+            {%- else -%}
+              <a href="{{ url }}" style=" text-decoration: none;">{{ title }}</a>
+              <span aria-hidden="true" style="margin: 0 6px; color: #aaa;">›</span>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+  </nav>
+
+  {%- comment %} SEO: Schema.org BreadcrumbList {% endcomment %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {%- assign schema_position = 0 -%}
+      {%- for item in items -%}
+        {%- assign part = item | split: '::' -%}
+        {%- assign title = part[1] -%}
+        {%- if title and title != blank -%}
+          {%- assign schema_position = schema_position | plus: 1 -%}
+          {%- unless forloop.first -%},{%- endunless -%}
+          {
+            "@type": "ListItem",
+            "position": {{ schema_position }},
+            "name": {{ title | json }}
+            {%- if part[0] and part[0] != '::' -%}
+              ,"item": "{{ shop.url }}{{ part[0] }}"
+            {%- endif -%}
+          }
+        {%- endif -%}
+      {%- endfor -%}
+    ]
+  }
+  </script>
+{%- endif -%}

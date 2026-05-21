@@ -1,0 +1,42 @@
+{%- liquid
+  assign alignment = alignment | default: 'center'
+  assign gap = gap | default: 10
+-%}
+
+<div
+  class="payment-icons"
+  style="
+    --icon-gap: {{ gap }}px;
+    --alignment: {{ alignment }};
+  "
+>
+  <span class="visually-hidden">{{ 'blocks.payment_methods' | t }}</span>
+  <ul class="payment-icons__list" role="list">
+    {%- for type in shop.enabled_payment_types -%}
+      <li class="payment-icons__item payment-icons__item--{{ type }}">
+        {{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
+
+{% stylesheet %}
+  .payment-icons {
+    width: 100%;
+  }
+
+  .payment-icons__list {
+    display: flex;
+    align-items: center;
+    justify-content: var(--alignment);
+    flex-wrap: wrap;
+    gap: var(--icon-gap);
+    margin: 0;
+    padding: 0;
+  }
+
+  .payment-icons__item {
+    display: flex;
+    align-items: center;
+  }
+{% endstylesheet %}

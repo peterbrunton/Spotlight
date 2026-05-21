@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Horizon",
-    "theme_version": "3.4.0",
+    "theme_version": "3.5.1",
     "theme_author": "Shopify",
     "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
     "theme_support_url": "https://support.shopify.com/"
@@ -350,6 +350,18 @@
       {
         "type": "header",
         "content": "t:content.fonts"
+      },
+      {
+        "type": "text",
+        "id": "custom_body_font",
+        "label": "Custom body font",
+        "default": "https://cdn.shopify.com/s/files/1/0177/9856/1846/files/acuminproextracond-medium-webfont.woff2?v=1751453035"
+      },
+      {
+        "type": "text",
+        "id": "custom_heading_font",
+        "label": "Custom heading bold",
+        "default": "https://cdn.shopify.com/s/files/1/0177/9856/1846/files/acuminproextracond-black-webfont.woff2?v=1751453300"
       },
       {
         "type": "font_picker",
@@ -1568,7 +1580,6 @@
         ],
         "default": "body"
       },
-
       {
         "type": "select",
         "id": "button_text_case_primary",
@@ -1625,7 +1636,6 @@
         ],
         "default": "body"
       },
-
       {
         "type": "select",
         "id": "button_text_case_secondary",
@@ -1764,7 +1774,6 @@
         "info": "t:info.checkout_buttons",
         "default": true
       },
-
       {
         "type": "url",
         "id": "empty_cart_button_link",

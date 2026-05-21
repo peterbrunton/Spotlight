@@ -1,0 +1,122 @@
+{% style %}
+  .line-item-property-{{ block.id }} {
+    margin: 20px 0;
+    padding: 16px 18px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .line-item-property-{{ block.id }} label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  .line-item-property__input-{{ block.id }} {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+    line-height: 1.4;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      background-color 0.18s ease,
+      transform 0.12s ease;
+  }
+
+  .line-item-property__input-{{ block.id }}::placeholder {
+    color: #9ca3af;
+  }
+
+  .line-item-property__input-{{ block.id }}:hover {
+    border-color: #9ca3af;
+  }
+
+  .line-item-property__input-{{ block.id }}:focus {
+    outline: none;
+    border-color: #111827;
+    box-shadow: 0 0 0 1px #111827;
+    background: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 749px) {
+    .line-item-property-{{ block.id }} {
+      margin: 16px 0;
+      padding: 14px 14px;
+      border-radius: 10px;
+    }
+
+    .line-item-property__input-{{ block.id }} {
+      font-size: 16px; /* avoid iOS zoom */
+      padding: 12px 12px;
+    }
+  }
+{% endstyle %}
+
+{%- assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id -%}
+
+<div class="line-item-property line-item-property-{{ block.id }}">
+  <label for="line-item-property__input-{{ block.id }}">
+    {{ block.settings.label }}
+  </label>
+
+  <input
+    id="line-item-property__input-{{ block.id }}"
+    class="line-item-property__input-{{ block.id }}"
+    type="text"
+    name="properties[engraving]"
+    title="Letters, numbers and spaces only (no symbols)"
+    placeholder="{{ block.settings.placeholder }}"
+    {% if block.settings.max_chars > 0 %}
+      maxlength="{{ block.settings.max_chars }}"
+    {% endif %}
+    pattern="^[A-Za-z0-9 ]+$"
+    form="{{ product_form_id }}"
+    required
+  >
+</div>
+
+{% schema %}
+{
+  "name": "Line item property",
+  "settings": [
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Placeholder",
+      "default": "Enter your text"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label text",
+      "default": "Add personalisation here"
+    },
+    {
+      "type": "range",
+      "id": "max_chars",
+      "label": "Max characters",
+      "min": 0,
+      "max": 15,
+      "step": 1,
+      "default": 12
+    }
+  ],
+  "presets": [
+    {
+      "name": "Line item property"
+    }
+  ]
+}
+{% endschema %}

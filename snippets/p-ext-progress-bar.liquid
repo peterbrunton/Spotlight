@@ -1,0 +1,182 @@
+{% comment %}{%- liquid
+  assign calculated_total_price = 0
+
+  for line_item in cart.items
+    if line_item.requires_shipping
+      assign calculated_total_price = calculated_total_price | plus: line_item.final_line_price
+    endif
+  endfor
+
+  assign total_cart_discount = 0
+  for discount_application in cart.cart_level_discount_applications
+    assign total_cart_discount = total_cart_discount | plus: discount_application.total_allocated_amount
+  endfor
+
+  assign calculated_total_price = calculated_total_price | minus: total_cart_discount
+
+  assign tier_1 = settings.progress_bar_tier_1_threshold | times: 100
+  assign max_threshold = tier_1
+  assign tier_1_remaining = tier_1 | minus: calculated_total_price | at_least: 0
+  assign tier_1_remaining_amount = tier_1_remaining | money
+
+  if settings.show_progress_bar_tier_2_breakpoint
+    assign tier_2 = settings.progress_bar_tier_2_threshold | times: 100
+    assign max_threshold = tier_2
+    assign tier_2_remaining = tier_2 | minus: calculated_total_price | at_least: 0
+    assign tier_2_remaining_amount = tier_2_remaining | money
+  endif
+
+  if settings.show_progress_bar_tier_3_breakpoint
+    assign tier_3 = settings.progress_bar_tier_3_threshold | times: 100
+    assign max_threshold = tier_3
+    assign tier_3_remaining = tier_3 | minus: calculated_total_price | at_least: 0
+    assign tier_3_remaining_amount = tier_3_remaining | money
+  endif
+
+  if max_threshold <= 0
+    assign progress_percent = 100
+  else
+    assign progress_percent = calculated_total_price | times: 100 | divided_by: max_threshold | at_most: 100 | at_least: 0
+  endif
+-%}{% endcomment %}
+{%- liquid
+  assign calculated_total_price = 0
+
+  for line_item in cart.items
+    if line_item.requires_shipping
+      assign calculated_total_price = calculated_total_price | plus: line_item.original_line_price
+    endif
+  endfor
+
+  assign tier_1 = settings.progress_bar_tier_1_threshold | times: 100
+  assign max_threshold = tier_1
+  assign tier_1_remaining = tier_1 | minus: calculated_total_price | at_least: 0
+  assign tier_1_remaining_amount = tier_1_remaining | money
+
+  if settings.show_progress_bar_tier_2_breakpoint
+    assign tier_2 = settings.progress_bar_tier_2_threshold | times: 100
+    assign max_threshold = tier_2
+    assign tier_2_remaining = tier_2 | minus: calculated_total_price | at_least: 0
+    assign tier_2_remaining_amount = tier_2_remaining | money
+  endif
+
+  if settings.show_progress_bar_tier_3_breakpoint
+    assign tier_3 = settings.progress_bar_tier_3_threshold | times: 100
+    assign max_threshold = tier_3
+    assign tier_3_remaining = tier_3 | minus: calculated_total_price | at_least: 0
+    assign tier_3_remaining_amount = tier_3_remaining | money
+  endif
+
+  if max_threshold <= 0
+    assign progress_percent = 100
+  else
+    assign progress_percent = calculated_total_price | times: 100 | divided_by: max_threshold | at_most: 100 | at_least: 0
+  endif
+-%}
+
+{%- if cart.requires_shipping and settings.show_progress_bar -%}
+  <div class="progress-bar">
+    <div class="progress-bar__track">
+      <div class="progress-bar__fill" style="width: {{ progress_percent }}%"></div>
+
+      {% if settings.show_progress_bar_tier_2_breakpoint or settings.show_progress_bar_tier_3_breakpoint %}
+      <span class="progress-bar__marker {% if calculated_total_price >= tier_1 %} is-active{% endif %}" style="left: {{ tier_1 | times: 100 | divided_by: max_threshold }}%">
+        {% if settings.progress_bar_tier_1_icon != none %}
+          {% render 'p-ext-progress-bar-icon', icon: settings.progress_bar_tier_1_icon %}
+        {% endif %}
+      </span>
+      {% endif %}
+      
+      {%- if settings.show_progress_bar_tier_2_breakpoint -%}
+        <span class="progress-bar__marker {% if calculated_total_price >= tier_2 %} is-active{% endif %}" style="left: {{ tier_2 | times: 100 | divided_by: max_threshold }}%">
+          {% if settings.progress_bar_tier_2_icon != none %}
+            {% render 'p-ext-progress-bar-icon', icon: settings.progress_bar_tier_2_icon %}
+          {% endif %}
+        </span>
+      {%- endif -%}
+
+      {%- if settings.show_progress_bar_tier_3_breakpoint -%}
+        <span class="progress-bar__marker {% if calculated_total_price >= tier_3 %} is-active{% endif %}" style="left: {{ tier_3 | times: 100 | divided_by: max_threshold }}%">
+          {% if settings.progress_bar_tier_3_icon != none %}
+            {% render 'p-ext-progress-bar-icon', icon: settings.progress_bar_tier_3_icon %}
+          {% endif %}
+        </span>
+      {%- endif -%}
+    </div>
+
+    <div class="progress-bar__message">
+      {%- if calculated_total_price >= tier_3 and settings.show_progress_bar_tier_3_breakpoint -%}
+        {{ settings.progress_bar_tier_3_message_unlocked }}
+      {%- elsif calculated_total_price >= tier_2 and settings.show_progress_bar_tier_2_breakpoint -%}
+        {{ settings.progress_bar_tier_2_message_unlocked }}
+        {%- if settings.show_progress_bar_tier_3_breakpoint -%}
+          {{ settings.progress_bar_tier_3_message_locked | replace: '[[ amount ]]', tier_3_remaining_amount }}
+        {%- endif -%}
+      {%- elsif calculated_total_price >= tier_1 -%}
+        {{ settings.progress_bar_tier_1_message_unlocked }}
+        {%- if settings.show_progress_bar_tier_2_breakpoint -%}
+          {{ settings.progress_bar_tier_2_message_locked | replace: '[[ amount ]]', tier_2_remaining_amount }}
+        {%- endif -%}
+      {%- else -%}
+        {{ settings.progress_bar_tier_1_message_locked | replace: '[[ amount ]]', tier_1_remaining_amount }}
+        {% comment %}Spend {{ tier_1 | minus: calculated_total_price | money }} more to unlock your first reward {% endcomment %}
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .cart-drawer__header {
+    flex-wrap: wrap; 
+  }
+  
+  .progress-bar {
+    flex-basis: 100%;
+    position: relative;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: var(--color-input-border);
+  }
+
+  .progress-bar__track {
+    position: relative;
+    height: 6px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    margin-bottom: 12px;
+  }
+
+  .progress-bar__fill {
+    height: 100%;
+    background-color: #ECA6CA;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  .progress-bar__message {
+    font-size: 0.925em;
+  }
+
+  .progress-bar__marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .progress-bar__marker svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+
+  .progress-bar__marker svg [stroke] { stroke: currentColor; }
+  .progress-bar__marker svg [fill] { fill: currentColor; }
+
+{% endstylesheet %}

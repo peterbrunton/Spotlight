@@ -1,0 +1,406 @@
+{% assign block_settings = block.settings %}
+
+<tabs-container
+  class="tabs tabs--{{ block.id }} border-style spacing-style{% if block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }}{% endif %}"
+  style="
+    --tab-font-family: var(--font-{{ block_settings.type_preset }}--family);
+    --tab-font-style: var(--font-{{ block_settings.type_preset }}--style);
+    --tab-font-weight: var(--font-{{ block_settings.type_preset }}--weight);
+    --tab-font-size: var(--font-{{ block_settings.type_preset }}--size);
+    --tab-font-line-height: var(--font-{{ block_settings.type_preset }}--line-height);
+    --gap: {{ block_settings.gap }}px;
+    {% render 's-ext-spacing-style', settings: block_settings %}
+    {% render 'border-override', settings: block_settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="tabs__panels">
+    {% content_for 'blocks' %}
+  </div>
+</tabs-container>
+
+{% stylesheet %}
+/* Enhanced Tabs Styling - Replace your existing CSS */
+.tabs {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  --tab-container-bg: var(--color-foreground-rgb);
+  --tab-active-bg: rgba(var(--color-foreground-rgb), 0.03);
+  --tab-inactive-bg: rgba(var(--color-foreground-rgb), 0.5);
+  --tab-active-text: rgb(var(--color-foreground-rgb));
+  --tab-inactive-text: rgba(var(--color-foreground-rgb), 0.7);
+}
+
+.tabs__panels {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.tab-panel {
+  --tab-width: calc(100% / var(--tab-count));
+  margin: 0;
+  flex: 1;
+  width: 100%;
+}
+
+.tab-panel .tab-panel__title:after {
+  content: "";
+  height: 30px;
+  width: 1px;
+  position: absolute;
+  right: 0;
+  top: 10px;
+  background-color: var(--color-input-border);
+}
+
+.tab-panel:has(+ .tab-panel .tab-panel__title[aria-selected="true"]) .tab-panel__title::after,
+.tab-panel:last-child .tab-panel__title:after {
+  display: none;
+}
+
+.tab-panel__title {
+  font-family: var(--tab-font-family);
+  font-size: var(--tab-font-size);
+  font-weight: var(--tab-font-weight);
+  line-height: var(--tab-font-line-height);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1rem 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-height: 44px;
+  transition: all 0.3s ease;
+  outline: none;
+  z-index: 2;
+  border: none;
+  
+  /* Segmented control positioning */
+  width: var(--tab-width);
+  position: absolute;
+  top: 2px;
+  left: calc(var(--tab-index) * var(--tab-width));
+  
+  /* Inactive state - subtle semi-transparent */
+  background: var(--tab-inactive-bg);
+  backdrop-filter: blur(10px);
+  color: var(--tab-inactive-text);
+  border-radius: 8px 8px 0 0;
+}
+
+/* Top accent line - add to all tabs */
+.tab-panel__title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgb(var(--color-foreground-rgb));
+  border-radius: 3px 3px 0 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s ease;
+}
+
+.tab-panel__title:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+  z-index: 3;
+}
+
+.tab-panel__title:hover:not([aria-selected="true"]) {
+  background: rgba(var(--color-foreground-rgb), 0.7);
+  color: rgb(var(--color-foreground-rgb));
+}
+
+/* Active tab state - opens to content */
+.tab-panel__title[aria-selected="true"] {
+  background: var(--tab-active-bg);
+  color: var(--tab-active-text);
+  z-index: 3;
+  position: relative;
+  margin-bottom: -1px;
+  padding-bottom: 15px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Show top accent on active tab */
+.tab-panel__title[aria-selected="true"]::before {
+  transform: scaleY(1);
+}
+
+/* Content area styling */
+.tab-panel__content {
+  position: relative;
+  width: 100%;
+  display: none;
+  background: var(--tab-active-bg);
+  padding: var(--gap);
+  margin-top: 0;
+  border-radius: 0 8px 8px 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.tab-panel[active] .tab-panel__content {
+  display: block;
+}
+
+.tab-panel__content * {
+  min-width: 100%;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 749px) {
+  .tabs__panels {
+    flex-direction: column;
+    padding: 4px;
+  }
+  
+  .tab-panel__title {
+    position: relative;
+    width: 100%;
+    left: auto;
+    top: auto;
+    margin-bottom: 4px;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Tabs",
+  "tag": null,
+  "class": "tabs",
+  "blocks": [
+    {
+      "type": "_t-ext-tab-panel"
+    }
+  ],
+  "settings": [
+    {
+      "type": "select",
+      "id": "type_preset",
+      "label": "Tab preset",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "paragraph",
+          "label": "t:options.paragraph"
+        },
+        {
+          "value": "h3",
+          "label": "t:options.h3"
+        },
+        {
+          "value": "h4",
+          "label": "t:options.h4"
+        },
+        {
+          "value": "h5",
+          "label": "t:options.h5"
+        },
+        {
+          "value": "h6",
+          "label": "t:options.h6"
+        }
+      ],
+      "default": "h5"
+    },
+    {
+      "type": "checkbox",
+      "id": "inherit_color_scheme",
+      "label": "t:settings.inherit_color_scheme",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1",
+      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.borders"
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.thickness",
+      "default": 1,
+      "visible_if": "{{ block.settings.border != \"none\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.opacity",
+      "default": 100,
+      "visible_if": "{{ block.settings.border != \"none\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tabs",
+      "category": "t:categories.layout",
+      "blocks": {
+        "panel-1": {
+          "type": "_t-ext-tab-panel",
+          "settings": {
+            "active_by_default": true,
+            "title": "Description"
+          },
+          "blocks": {
+            "text-1": {
+              "type": "t-ext-text",
+              "settings": {
+                "text": "<p>This product is made with premium materials and built to last.</p>",
+                "width": "100%"
+              }
+            }
+          },
+          "block_order": [
+            "text-1"
+          ]
+        },
+        "panel-2": {
+          "type": "_t-ext-tab-panel",
+          "settings": {
+            "title": "Shipping"
+          },
+          "blocks": {
+            "text-1": {
+              "type": "t-ext-text",
+              "settings": {
+                "text": "<p>Ships within 1–3 business days. Free returns within 30 days.</p>",
+                "width": "100%"
+              }
+            }
+          },
+          "block_order": [
+            "text-1"
+          ]
+        },
+        "panel-3": {
+          "type": "_t-ext-tab-panel",
+          "settings": {
+            "title": "Reviews"
+          },
+          "blocks": {
+            "text-1": {
+              "type": "t-ext-text",
+              "settings": {
+                "text": "<p>Customers love the comfort and quality of this item.</p>",
+                "width": "100%"
+              }
+            }
+          },
+          "block_order": [
+            "text-1"
+          ]
+        }
+      },
+      "block_order": [
+        "panel-1",
+        "panel-2",
+        "panel-3"
+      ]
+    }
+  ]
+}
+{% endschema %}

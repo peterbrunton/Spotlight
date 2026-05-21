@@ -1,0 +1,20 @@
+{% schema %}
+{
+  "name": "Klarna Payment",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Klarna marketing"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Klarna Payment",
+      "category": "t:categories.basic",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}
+
+{% render 'p-ext-payment-installments' %}

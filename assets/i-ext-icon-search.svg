@@ -1,0 +1,4 @@
+<svg aria-hidden="true" fill="none" focusable="false" width="24" viewBox="0 0 24 24">
+  <path d="M10.364 3a7.364 7.364 0 1 0 0 14.727 7.364 7.364 0 0 0 0-14.727Z" stroke="currentColor" stroke-width="var(--icon-stroke-width)"  stroke-miterlimit="10"></path>
+  <path d="M15.857 15.858 21 21.001" stroke="currentColor" stroke-width="var(--icon-stroke-width)" stroke-miterlimit="10" stroke-linecap="round"></path>
+</svg>

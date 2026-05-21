@@ -1,0 +1,229 @@
+{%liquid
+  assign display_discount_code = false
+  assign discount_code = settings.featured_discount_code
+  assign discount_collection = settings.featured_discount_collection
+  assign button_text = settings.featured_discount_button_text | default: 'Apply Code'
+  assign success_text = settings.featured_discount_success_text | default: 'Code [[code]] Applied!'
+  assign button_color = settings.featured_discount_button_color | default: '#FB5373'
+  assign success_color = settings.featured_discount_success_color | default: '#24936B'
+
+  for collection in product.collections
+    if collection.title == discount_collection.title
+      assign display_discount_code = true
+      break 
+    endif 
+  endfor 
+%}
+
+{% if discount_code != blank and display_discount_code %}
+  <script type="module">
+    import { 
+      fetchConfig, 
+      onDocumentReady,
+      prefersReducedMotion,
+      scheduler
+    } from '{{ 'utilities.js' | asset_url }}';
+    import { CartUpdateEvent } from '{{ "events.js" | asset_url }}';
+    
+    class ApplyDiscountButton extends HTMLElement {
+      connectedCallback() {
+        
+        this.discountCode = this.dataset.discountCode;
+        this.buttonText = this.dataset.buttonText;
+        this.successTextTemplate = this.dataset.successText;
+        this.buttonColor = this.dataset.buttonColor;
+        this.successColor = this.dataset.successColor;
+
+        onDocumentReady(() => {
+          this.button = this.createButton();
+          this.checkIfDiscountApplied();
+          this.button.addEventListener('click', this.handleClick.bind(this));
+        });
+      }
+
+      createButton() {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = "button-apply-discount button flex flex-basis-full justify-center";
+        button.style.backgroundColor = this.buttonColor;
+
+        const buttonTextWithActiveCode = this.buttonText.replace('[[code]]', this.discountCode);
+        
+        button.innerHTML = `<span>${buttonTextWithActiveCode}</span>`;
+        
+        this.appendChild(button);
+        return button;
+      }
+
+      checkIfDiscountApplied() {
+        const appliedCode = sessionStorage.getItem('discount_code');
+        if (appliedCode === this.discountCode) {
+          this.showAppliedState();
+        }
+      }
+
+      handleClick() {
+        if (this.button.disabled) return;
+        
+        // Immediate UI feedback
+        this.button.disabled = true;
+        this.button.classList.add('loading');
+        
+        // Schedule the actual discount application to avoid blocking UI
+        scheduler.schedule(async () => {
+          try {
+            await this.applyDiscount(this.discountCode);
+            const updatedCart = await this.updateCart();
+            
+            sessionStorage.setItem('discount_code', this.discountCode);
+            this.showAppliedState();
+
+            const event = new CartUpdateEvent(updatedCart, 'apply-discount-button', {
+              source: 'discount',
+              itemCount: updatedCart?.item_count || 0,
+                sections: {
+                  'cart-drawer': 'cart-drawer'
+                }
+            });
+            document.dispatchEvent(event);
+            
+          } catch (error) {
+            console.error('Error applying discount:', error);
+            this.button.disabled = false;
+            this.button.classList.remove('loading');
+            this.showError();
+          }
+        });
+      }
+
+      showAppliedState() {
+        this.button.classList.remove('loading');
+        this.button.classList.add('applied');
+        
+        // Only animate if user hasn't requested reduced motion
+        if (!prefersReducedMotion()) {
+          this.button.style.animation = 'successPulse 0.4s ease-out';
+        }
+
+        const successText = this.successTextTemplate.replace('[[code]]', this.discountCode);
+
+        this.button.style.backgroundColor = this.successColor;
+        this.button.innerHTML = `<span>${successText}</span>`;
+      }
+
+      showError() {
+        const originalHTML = this.button.innerHTML;
+        this.button.classList.add('error');
+        this.button.innerHTML = `<span>❌ Unable to apply discount</span>`;
+        
+        setTimeout(() => {
+          this.button.innerHTML = originalHTML;
+          this.button.classList.remove('error');
+          this.button.disabled = false;
+        }, 3000);
+      }
+
+      async applyDiscount(code) {
+        const response = await fetch(`/discount/${code}`);
+        if (!response.ok) {
+          throw new Error(`Failed to apply discount: ${response.status}`);
+        }
+        return response;
+      }
+
+      async updateCart() {
+        // Use the fetchConfig utility for proper headers
+        return fetch('/cart/update.js', fetchConfig('json', {
+          body: JSON.stringify({ updates: {} })
+        }));
+      }
+    }
+  
+    if (!customElements.get('apply-discount-button')) {
+      customElements.define('apply-discount-button', ApplyDiscountButton);
+    }
+  </script>
+
+  <apply-discount-button
+    class="flex"
+    data-discount-code="{{ discount_code }}"
+    data-button-text="{{ button_text }}"
+    data-success-text="{{ success_text }}"
+    data-button-color="{{ button_color }}"
+    data-success-color="{{ success_color }}"
+  ></apply-discount-button>
+
+  <style>
+    apply-discount-button {
+      display: block;
+      margin: 1rem 0;
+    }
+
+    .apply-discount-button {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .apply-discount-button:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .apply-discount-button svg {
+      flex-shrink: 0;
+    }
+
+    .apply-discount-button.loading {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .apply-discount-button.loading svg {
+      animation: spin 1s linear infinite;
+    }
+
+    .apply-discount-button.applied {
+      background-color: var(--color-success, #10b981);
+      cursor: default;
+    }
+
+    .apply-discount-button.error {
+      background-color: var(--color-error, #ef4444);
+    }
+
+    .apply-discount-button:disabled {
+      cursor: not-allowed;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes successPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Respect user's motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      .apply-discount-button,
+      .apply-discount-button * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Featured Discount Code",
+  "tag": null,
+  "presets": [
+    {
+      "name": "Featured Discount Code"
+    }
+  ]
+}
+{% endschema %}

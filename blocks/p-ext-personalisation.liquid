@@ -1,0 +1,911 @@
+{% style %}
+  .line-item-property-{{ block.id }} {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    padding: 0 16px;
+    margin: 0 0;
+
+    background: transparent;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(20px) scale(0.95);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .line-item-property-{{ block.id }}.visible {
+    max-height: 300px;
+    opacity: 1;
+    padding: 24px 16px;
+    transform: translateY(0) scale(1);
+    margin: 16px 0;
+
+    background-color: var(--color-input-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .line-item-property-{{ block.id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: transparent;
+    border-radius: 16px 16px 0 0;
+    opacity: 0;
+    transform: scaleX(0);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .line-item-property-{{ block.id }}.visible::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .line-item-property__input-{{ block.id }} {
+    width: 100%;
+    padding: 16px 20px;
+    border: 1px solid {{ block.settings.input_border_color }};
+    border-radius: 8px;
+    color: {{ block.settings.input_text_color }};
+    font-size: {{ block.settings.input_text_size }}px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    position: relative;
+    z-index: 1;
+  }
+
+  .line-item-property__input-{{ block.id }}:hover {
+    border-color: var(--color-input-border-hover, #B0B0B0);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+  }
+
+  .line-item-property-{{ block.id }}.visible .line-item-property__input-{{ block.id }} {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition-delay: 0.2s;
+  }
+
+  .line-item-property__input-{{ block.id }}:focus {
+    outline: none;
+    border-color: {{ block.settings.input_focus_border_color }};
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+  }
+
+  .line-item-property__input-{{ block.id }}::placeholder {
+    color: {{ block.settings.placeholder_color }};
+    font-weight: 400;
+    transition: all 0.3s ease;
+  }
+
+  .line-item-property__input-{{ block.id }}:focus::placeholder {
+    opacity: 0.7;
+    transform: translateY(-2px);
+  }
+
+  /* Floating label effect */
+  .line-item-property__label-{{ block.id }} {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    color: {{ block.settings.placeholder_color }};
+    font-size: {{ block.settings.input_text_size }}px;
+    font-weight: 500;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+  }
+
+  .line-item-property__input-{{ block.id }}:focus + .line-item-property__label-{{ block.id }},
+  .line-item-property__input-{{ block.id }}:not(:placeholder-shown) + .line-item-property__label-{{ block.id }} {
+    top: -8px;
+    left: 16px;
+    font-size: 12px;
+    opacity: 1;
+    background: white;
+    color: {{ block.settings.placeholder_color }};
+    padding: 0 8px;
+  }
+
+  .line-item-property__description-{{ block.id }} {
+    margin-top: 12px;
+    font-size: {{ block.settings.description_size }}px;
+    font-weight: 500;
+    color: {{ block.settings.description_color }};
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
+    position: relative;
+  }
+
+  .line-item-property__description-{{ block.id }}::before {
+    content: '';
+    margin-right: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .line-item-property-{{ block.id }}.visible .line-item-property__description-{{ block.id }} {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition-delay: 0.3s;
+  }
+
+  .line-item-property-{{ block.id }}.visible .line-item-property__description-{{ block.id }}::before {
+    opacity: 0;
+    transition-delay: 0.5s;
+  }
+
+  .line-item-property__required-{{ block.id }} {
+    color: {{ block.settings.required_color }};
+    font-weight: 600;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* Character counter */
+  .line-item-property__counter-{{ block.id }} {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    opacity: 0;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 6px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+  }
+
+  .line-item-property__input-{{ block.id }}:focus ~ .line-item-property__counter-{{ block.id }} {
+    opacity: 1;
+  }
+
+  .line-item-property__counter-{{ block.id }}.warning {
+    color: #f59e0b;
+  }
+
+  .line-item-property__counter-{{ block.id }}.danger {
+    color: #ef4444;
+  }
+
+  /* Mobile optimizations */
+  @media screen and (max-width: 749px) {
+    .line-item-property-{{ block.id }} {
+      margin: 12px 0;
+      border-radius: 12px;
+    }
+
+    .line-item-property-{{ block.id }}.visible {
+      padding: 20px 12px;
+    }
+
+    .line-item-property__input-{{ block.id }} {
+      padding: 14px 16px;
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
+
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .line-item-property-{{ block.id }},
+    .line-item-property__input-{{ block.id }},
+    .line-item-property__description-{{ block.id }} {
+      transition: none;
+    }
+  }
+
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .line-item-property-{{ block.id }}.visible {
+      border: 2px solid #000;
+      background: #fff;
+    }
+
+    .line-item-property__input-{{ block.id }} {
+      border: 2px solid #000;
+      background: #fff;
+    }
+  }
+{% endstyle %}
+
+{%- assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id -%}
+{% comment %}
+{%- assign product_form_id = 'ProductForm-' | append: product.id -%}
+{% endcomment %}
+
+<personalisation-line-item 
+  class="line-item-property-{{ block.id }}"
+  data-variant-trigger="{{ block.settings.variant_trigger | downcase }}"
+  data-block-type="line-item-property"
+  {{ block.shopify_attributes }}
+  >
+  <div class="line-item-property__input-wrapper" style="position: relative;">
+    {% if block.settings.input_type == 'textarea' %}
+      <textarea
+        id="engraving-input-{{ block.id }}"
+        name="properties[engraving]"
+        class="line-item-property__input-{{ block.id }}"
+        placeholder="{{ block.settings.placeholder }}"
+        {% if block.settings.required %}required{% endif %}
+        {% if block.settings.max_length > 0 %}maxlength="{{ block.settings.max_length }}"{% endif %}
+        rows="{{ block.settings.textarea_rows }}"
+        form="{{ product_form_id }}"
+        >
+      </textarea>
+    {% else %}
+      <input
+        type="text"
+        id="engraving-input-{{ block.id }}"
+        name="properties[engraving]"
+        class="line-item-property__input-{{ block.id }}"
+        placeholder="{{ block.settings.placeholder }}"
+        pattern="{{ block.settings.pattern }}"
+        {% if block.settings.required %}required{% endif %}
+        {% if block.settings.max_length > 0 %}maxlength="{{ block.settings.max_length }}"{% endif %}
+        form="{{ product_form_id }}"
+      >
+    {% endif %}
+    
+    {% if block.settings.max_length > 0 %}
+      <div class="line-item-property__counter-{{ block.id }}">
+        <span class="current">0</span>/<span class="max">{{ block.settings.max_length }}</span>
+      </div>
+    {% endif %}
+  </div>
+  
+  {% if block.settings.description != blank %}
+    <small class="line-item-property__description-{{ block.id }}">
+      {{ block.settings.description }}
+      {% if block.settings.required %}<span class="line-item-property__required-{{ block.id }}">*</span>{% endif %}
+    </small>
+  {% endif %}
+</personalisation-line-item>
+
+<script>
+  (function() {
+    if (!customElements.get('personalisation-line-item')) {
+      customElements.define('personalisation-line-item', class PersonalisationLineItem extends HTMLElement {
+        constructor() {
+          super();
+          this.variantTrigger = this.dataset.variantTrigger;
+          this.input = this.querySelector('.line-item-property__input-{{ block.id }}');
+          this.counter = this.querySelector('.line-item-property__counter-{{ block.id }}');
+          this.productForm = document.querySelector('product-form form, form[action*="/cart/add"]');
+          this.quantityInput = document.querySelector('quantity-selector .quantity-selector__input') ||
+                               document.querySelector('[name="quantity"]');
+
+          this.setupCharacterCounter();
+          this.setupInputValidation();
+        }
+
+        connectedCallback() {
+          this.setupVariantListener();
+          this.checkInitialVariant();
+          this.setupAccessibilityFeatures();
+          setTimeout(() => {
+            if (!this.addToCartButton) {
+              this.setupAddToCartControl();
+            }
+          }, 200);
+        }
+
+        setupAddToCartControl() {
+          if (this.addToCartButton) return;
+          
+          this.addToCartButton = document.querySelector('button[type="submit"]');
+          
+          if (!this.addToCartButton) {
+            console.warn('[Personalisation] Add to cart button not found');
+            return;
+          }
+
+          this.originalButtonDisabled = this.addToCartButton.disabled;
+          
+          console.log('[DEBUG] Clean original text:', `"${this.originalButtonText}"`);
+
+          console.log('[DEBUG] Original text:', `"${this.originalButtonText}"`);
+          console.log('[DEBUG] Original disabled:', this.originalButtonDisabled);
+
+          // Listen for input changes
+          if (this.input) {
+            console.log('[DEBUG] Input found, adding listeners');
+            this.input.addEventListener('input', () => {
+              console.log('[DEBUG] Input changed:', `"${this.input.value}"`);
+              this.updateAddToCartState();
+            });
+            
+            this.input.addEventListener('blur', () => {
+              this.updateAddToCartState();
+            });
+          } else {
+            console.error('[DEBUG] NO INPUT FOUND');
+          }
+
+          // Initial state check
+          console.log('[DEBUG] Running initial updateAddToCartState');
+          this.updateAddToCartState();
+        }
+
+        updateAddToCartState() {
+          if (!this.addToCartButton) return;
+
+          const isVisible = this.classList.contains('visible');
+          const hasValue = this.input?.value.trim().length > 0;
+          const isValid = this.isInputValid();
+
+          // Force requirement when personalisation field is visible
+          const shouldDisable = isVisible && (!hasValue || !isValid);
+
+          if (shouldDisable) {
+            this.disableAddToCartButton();
+          } else {
+            this.enableAddToCartButton();
+          }
+        }
+
+        disableAddToCartButton() {
+          if (!this.addToCartButton) return;
+
+          this.addToCartButton.disabled = true;
+          this.addToCartButton.setAttribute('aria-disabled', 'true');
+          
+          // Only visual styling - no text change
+          this.addToCartButton.style.opacity = '0.6';
+          this.addToCartButton.style.cursor = 'not-allowed';
+          
+          // Add class for additional styling
+          this.addToCartButton.classList.add('personalisation-required');
+        }
+
+        enableAddToCartButton() {
+          if (!this.addToCartButton) return;
+
+          this.addToCartButton.disabled = this.originalButtonDisabled;
+          this.addToCartButton.removeAttribute('aria-disabled');
+          
+          // Only remove visual styling - no text change
+          this.addToCartButton.style.opacity = '';
+          this.addToCartButton.style.cursor = '';
+          
+          // Remove class
+          this.addToCartButton.classList.remove('personalisation-required');
+        }
+
+        isInputValid() {
+          if (!this.input) return true;
+
+          const value = this.input.value.trim();
+          const pattern = this.input.getAttribute('pattern');
+
+          // Check pattern validation (silent check, no error messages)
+          if (pattern && value && !new RegExp(pattern).test(value)) {
+            return false;
+          }
+
+          return true;
+        }
+
+        setupCharacterCounter() {
+          if (this.input && this.counter) {
+            this.input.addEventListener('input', () => {
+              const current = this.input.value.length;
+              const max = parseInt(this.input.getAttribute('maxlength') || '0');
+              
+              if (max > 0) {
+                const currentSpan = this.counter.querySelector('.current');
+                if (currentSpan) {
+                  currentSpan.textContent = current;
+                  
+                  // Visual feedback based on character count
+                  this.counter.classList.remove('warning', 'danger');
+                  if (current > max * 0.8) {
+                    this.counter.classList.add('warning');
+                  }
+                  if (current > max * 0.95) {
+                    this.counter.classList.add('danger');
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        setupInputValidation() {
+          if (this.input) {
+            this.input.addEventListener('blur', () => {
+              this.validateInput();
+            });
+
+            this.input.addEventListener('input', () => {
+              // Real-time validation feedback
+              this.clearValidationErrors();
+            });
+          }
+        }
+
+        validateInput() {
+          if (!this.input) return true;
+
+          const value = this.input.value.trim();
+          const pattern = this.input.getAttribute('pattern');
+          const required = this.input.hasAttribute('required');
+
+          // Clear previous errors
+          this.clearValidationErrors();
+
+          if (required && !value) {
+            this.showValidationError('This field is required');
+            return false;
+          }
+
+          if (pattern && value && !new RegExp(pattern).test(value)) {
+            this.showValidationError('Please enter only letters, numbers, and spaces');
+            return false;
+          }
+
+          return true;
+        }
+
+        showValidationError(message) {
+          this.input.style.borderColor = '#ef4444';
+          this.input.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.1)';
+          
+          // Add error message if it doesn't exist
+          let errorMsg = this.querySelector('.validation-error');
+          if (!errorMsg) {
+            errorMsg = document.createElement('div');
+            errorMsg.className = 'validation-error';
+            errorMsg.style.cssText = `
+              color: #ef4444;
+              font-size: 12px;
+              margin-top: 4px;
+              font-weight: 500;
+              opacity: 0;
+              transform: translateY(-4px);
+              transition: all 0.3s ease;
+            `;
+            this.appendChild(errorMsg);
+          }
+          errorMsg.textContent = message;
+          
+          // Animate in
+          requestAnimationFrame(() => {
+            errorMsg.style.opacity = '1';
+            errorMsg.style.transform = 'translateY(0)';
+          });
+        }
+
+        clearValidationErrors() {
+          this.input.style.borderColor = '';
+          this.input.style.boxShadow = '';
+          
+          const errorMsg = this.querySelector('.validation-error');
+          if (errorMsg) {
+            errorMsg.style.opacity = '0';
+            errorMsg.style.transform = 'translateY(-4px)';
+            setTimeout(() => errorMsg.remove(), 300);
+          }
+        }
+
+        setupAccessibilityFeatures() {
+          if (this.input) {
+            // Add ARIA attributes
+            this.input.setAttribute('aria-describedby', `description-{{ block.id }}`);
+            
+            const description = this.querySelector('.line-item-property__description-{{ block.id }}');
+            if (description) {
+              description.id = `description-{{ block.id }}`;
+            }
+
+            // Announce changes to screen readers
+            this.input.addEventListener('input', () => {
+              if (this.counter) {
+                const current = this.input.value.length;
+                const max = parseInt(this.input.getAttribute('maxlength') || '0');
+                this.input.setAttribute('aria-label', 
+                  `${this.input.placeholder}. ${current} of ${max} characters used.`
+                );
+              }
+            });
+          }
+        }
+
+        setupVariantListener() {
+          const variantPicker = document.querySelector('variant-picker');
+
+          if (variantPicker) {
+            const variantRadios = variantPicker.querySelectorAll('input[type="radio"][name*="Style-"]');
+
+            variantRadios.forEach(radio => {
+              radio.addEventListener('change', () => {
+                this.handlePersonalizationOptionChange(radio.value);
+              });
+            });
+
+            document.addEventListener('variant:change', (event) => {
+              if (event.detail?.variant) {
+                this.handleVariantChange(event.detail.variant);
+              }
+            });
+
+            if (this.productForm) {
+              this.productForm.addEventListener('change', (event) => {
+                const target = event.target;
+                if (target.matches('[name^="options["], [name="id"]')) {
+                  this.checkCurrentVariant();
+                }
+              });
+            }
+
+            const initialCheckedRadio = variantPicker.querySelector('input[type="radio"]:checked');
+            if (initialCheckedRadio) {
+              this.handlePersonalizationOptionChange(initialCheckedRadio.value);
+            }
+          }
+        }
+
+        checkInitialVariant() {
+          this.checkCurrentVariant();
+        }
+
+        checkCurrentVariant() {
+          const selectedVariant = this.getCurrentVariant();
+          if (selectedVariant) {
+            this.handleVariantChange(selectedVariant);
+          }
+        }
+
+        getCurrentVariant() {
+          if (!this.productForm) return null;
+        
+          const variantIdInput = this.productForm.querySelector('input[name="id"]');
+          if (!variantIdInput || !variantIdInput.value) return null;
+        
+          const variantId = parseInt(variantIdInput.value);
+        
+          const variantPicker = document.querySelector('variant-picker');
+          if (variantPicker) {
+            const variantScript = variantPicker.querySelector('script[type="application/json"]');
+            if (variantScript) {
+              try {
+                const variantData = JSON.parse(variantScript.textContent);
+                if (variantData && variantData.id === variantId) {
+                  return variantData;
+                }
+              } catch (err) {
+                console.warn('[Personalisation] Failed to parse variant-picker JSON:', err);
+              }
+            }
+          }
+        
+          const productData = this.getProductDataFromScript();
+          if (productData && productData.variants) {
+            const match = productData.variants.find(v => v.id === variantId);
+            if (match) {
+              return match;
+            }
+          }
+        
+          return null;
+        }
+
+        getProductDataFromScript() {
+          const productScript = document.querySelector('script[type="application/json"][data-product-json]');
+          if (productScript) {
+            try {
+              return JSON.parse(productScript.textContent);
+            } catch (e) {
+              console.warn('[Personalisation] Error parsing product JSON:', e);
+            }
+          }
+          return null;
+        }
+
+        handlePersonalizationOptionChange(selectedOptionValue) {
+          const triggerLower = this.variantTrigger.toLowerCase();
+          const selectedOptionLower = selectedOptionValue.toLowerCase();
+
+          if (selectedOptionLower.includes(triggerLower)) {
+            this.showProperty();
+            if (this.quantityInput) {
+              this.quantityInput.value = '1';
+              this.quantityInput.disabled = true;
+            }
+          } else {
+            this.hideProperty();
+            if (this.quantityInput) {
+              this.quantityInput.disabled = false;
+            }
+          }
+        }
+
+        handleVariantChange(variant) {
+          if (!variant || !this.variantTrigger) return;
+
+          const shouldShow = this.shouldShowForVariant(variant);
+
+          if (shouldShow) {
+            this.showProperty();
+            if (this.quantityInput) {
+              this.quantityInput.value = '1';
+              this.quantityInput.disabled = true;
+            }
+          } else {
+            this.hideProperty();
+            if (this.quantityInput) {
+              this.quantityInput.disabled = false;
+            }
+          }
+        }
+
+        shouldShowForVariant(variant) {
+          const title = variant.title?.toLowerCase() || '';
+          const trigger = this.variantTrigger.toLowerCase();
+
+          const titleMatch = title.includes(trigger);
+          const optionsMatch = variant.options?.some(opt => (opt || '').toLowerCase().includes(trigger));
+
+          return titleMatch || optionsMatch;
+        }
+
+        showProperty() {
+          this.classList.add('visible');
+          if (this.input) {
+            this.input.disabled = false;
+            // Focus with delay for better UX
+            setTimeout(() => {
+              this.input.focus();
+            }, 500);
+          }
+          
+          // Announce to screen readers
+          this.setAttribute('aria-live', 'polite');
+          this.setAttribute('aria-label', 'Personalization options now available');
+        
+          this.updateAddToCartState();
+        }
+
+        hideProperty() {
+          this.classList.remove('visible');
+          if (this.input) {
+            this.input.disabled = true;
+            this.input.value = '';
+            this.clearValidationErrors();
+          }
+          
+          // Update character counter
+          if (this.counter) {
+            const currentSpan = this.counter.querySelector('.current');
+            if (currentSpan) {
+              currentSpan.textContent = '0';
+            }
+          }
+          this.updateAddToCartState();
+        }
+
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Personalisation",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Placeholder text",
+      "default": "Personalise your device"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Laser engrave up to 12 characters (letters & numbers only)</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "Required field",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Visibility"
+    },
+    {
+      "type": "text",
+      "id": "variant_trigger",
+      "label": "Show when variant contains",
+      "default": "Personalised",
+      "info": "Block will only show when the selected variant title or option contains this text"
+    },
+    {
+      "type": "header",
+      "content": "Input Settings"
+    },
+    {
+      "type": "select",
+      "id": "input_type",
+      "label": "Input type",
+      "options": [
+        {
+          "value": "text",
+          "label": "Single line"
+        },
+        {
+          "value": "textarea",
+          "label": "Multi-line"
+        }
+      ],
+      "default": "text"
+    },
+    {
+      "type": "range",
+      "id": "max_length",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "label": "Maximum characters",
+      "default": 20,
+      "info": "Set to 0 for no limit"
+    },
+    {
+      "type": "text",
+      "id": "pattern",
+      "label": "Regular expression pattern",
+      "default": "[A-Za-z0-9 ]+"
+    },
+    {
+      "type": "range",
+      "id": "textarea_rows",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "label": "Textarea rows",
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "input_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label color",
+      "default": "#667eea"
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "Input background",
+      "default": "rgba(255, 255, 255, 0.9)"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Input text color",
+      "default": "#1e293b"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Border color",
+      "default": "#e2e8f0"
+    },
+    {
+      "type": "color",
+      "id": "input_focus_border_color",
+      "label": "Focus border color",
+      "default": "#667eea"
+    },
+    {
+      "type": "color",
+      "id": "placeholder_color",
+      "label": "Placeholder color",
+      "default": "#94a3b8"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "default": "#64748b"
+    },
+    {
+      "type": "color",
+      "id": "required_color",
+      "label": "Required asterisk color",
+      "default": "#ef4444"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Label size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "input_text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Input text size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 12
+    }
+  ],
+  "presets": [
+    {
+      "name": "Enhanced Personalisation"
+    }
+  ]
+}
+{% endschema %}

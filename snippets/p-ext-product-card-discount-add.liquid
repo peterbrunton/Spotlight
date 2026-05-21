@@ -1,0 +1,268 @@
+{%- doc -%}
+  Renders a product card with a CTA that adds a variant to cart and applies discount code(s).
+
+  @param {product} product - Product object to render
+  @param {string} [discount_code] - Discount code or comma-separated codes
+  @param {number} [quantity] - Quantity to add (defaults to 1)
+  @param {variant} [target_variant] - Variant to add (defaults to selected_or_first_available_variant)
+  @param {boolean} [redirect_to_cart] - Keep buyer on cart when true (defaults to false)
+  @param {string} [button_label] - Optional custom button label
+  @param {string} [class] - Optional extra CSS classes for wrapper
+  @param {string} [render_mode] - `button` (default) or `card`
+  @param {string} [add_mode] - `ajax` or `permalink` (button defaults to `ajax`)
+
+  @example
+  {% render 'p-ext-product-card-discount-add', product: product, discount_code: 'WELCOME10' %}
+  {% render 'p-ext-product-card-discount-add', product: product, discount_code: 'WELCOME10', render_mode: 'button' %}
+{%- enddoc -%}
+
+{% liquid
+  assign product_resource = product
+  if product_resource == blank
+    assign product_resource = closest.product
+  endif
+
+  assign variant = target_variant | default: product_resource.selected_or_first_available_variant
+  assign quantity_value = quantity | default: 1 | plus: 0
+  assign should_redirect_to_cart = redirect_to_cart | default: false
+  assign output_mode = render_mode | default: 'button'
+  assign button_add_mode = add_mode
+
+  if quantity_value < 1
+    assign quantity_value = 1
+  endif
+
+  if button_add_mode == blank
+    if output_mode == 'button'
+      assign button_add_mode = 'ajax'
+    else
+      assign button_add_mode = 'permalink'
+    endif
+  endif
+
+  assign query_params = ''
+  if discount_code != blank
+    assign encoded_discount_code = discount_code | url_encode
+    assign query_params = query_params | append: 'discount=' | append: encoded_discount_code
+  endif
+
+  if should_redirect_to_cart
+    if query_params != blank
+      assign query_params = query_params | append: '&'
+    endif
+    assign query_params = query_params | append: 'storefront=true'
+  endif
+
+  assign cart_path = '/cart/' | append: variant.id | append: ':' | append: quantity_value
+  if query_params != blank
+    assign cart_path = cart_path | append: '?' | append: query_params
+  endif
+%}
+
+{% if product_resource and variant %}
+  {% if output_mode == 'button' %}
+    {% if variant.available %}
+      {% if button_add_mode == 'ajax' %}
+        <discount-add-to-cart
+          class="product-card-discount-add-ajax{% if class != blank %} {{ class }}{% endif %}"
+          data-variant-id="{{ variant.id }}"
+          data-quantity="{{ quantity_value }}"
+          data-discount-code="{{ discount_code | escape }}"
+          data-redirect-to-cart="{{ should_redirect_to_cart }}"
+        >
+          <button class="product-card-discount-add__cta button" type="button">
+            {% if button_label != blank %}
+              {{ button_label }}
+            {% else %}
+              {{ 'products.product.add_to_cart_with_discount' | t }}
+            {% endif %}
+          </button>
+        </discount-add-to-cart>
+      {% else %}
+        <a class="product-card-discount-add__cta button{% if class != blank %} {{ class }}{% endif %}" href="{{ cart_path }}">
+          {% if button_label != blank %}
+            {{ button_label }}
+          {% else %}
+            {{ 'products.product.add_to_cart_with_discount' | t }}
+          {% endif %}
+        </a>
+      {% endif %}
+    {% else %}
+      <span class="product-card-discount-add__sold-out{% if class != blank %} {{ class }}{% endif %}">
+        {{ 'products.product.sold_out' | t }}
+      </span>
+    {% endif %}
+  {% else %}
+    <article class="product-card-discount-add{% if class != blank %} {{ class }}{% endif %}">
+      <a class="product-card-discount-add__media" href="{{ product_resource.url }}">
+        {% if product_resource.featured_image %}
+          {{ product_resource.featured_image | image_url: width: 720 | image_tag: loading: 'lazy', alt: product_resource.featured_image.alt }}
+        {% else %}
+          {{ 'product-1' | placeholder_svg_tag: 'product-card-discount-add__placeholder' }}
+        {% endif %}
+      </a>
+
+      <div class="product-card-discount-add__content">
+        <h3 class="product-card-discount-add__title">
+          <a href="{{ product_resource.url }}">{{ product_resource.title }}</a>
+        </h3>
+
+        {% if product_resource.price_varies %}
+          <p class="product-card-discount-add__price">{{ product_resource.price_min | money }}</p>
+        {% else %}
+          <p class="product-card-discount-add__price">{{ product_resource.price | money }}</p>
+        {% endif %}
+
+        {% if variant.available %}
+          <a class="product-card-discount-add__cta button" href="{{ cart_path }}">
+            {% if button_label != blank %}
+              {{ button_label }}
+            {% else %}
+              {{ 'products.product.add_to_cart_with_discount' | t }}
+            {% endif %}
+          </a>
+        {% else %}
+          <span class="product-card-discount-add__sold-out">{{ 'products.product.sold_out' | t }}</span>
+        {% endif %}
+      </div>
+    </article>
+  {% endif %}
+{% endif %}
+
+{% stylesheet %}
+  .product-card-discount-add {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .product-card-discount-add__media {
+    display: block;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .product-card-discount-add__media img,
+  .product-card-discount-add__placeholder {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .product-card-discount-add__content {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .product-card-discount-add__title {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .product-card-discount-add__title a {
+    text-decoration: none;
+  }
+
+  .product-card-discount-add__price {
+    margin: 0;
+  }
+
+  .product-card-discount-add__sold-out {
+    opacity: 0.7;
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  class DiscountAddToCart extends HTMLElement {
+    connectedCallback() {
+      this.button = this.querySelector('button');
+      if (!this.button) return;
+      this.handleClickBound = this.handleClick.bind(this);
+      this.stopBubbleBound = this.stopBubble.bind(this);
+      this.addEventListener('click', this.stopBubbleBound, true);
+      this.addEventListener('pointerdown', this.stopBubbleBound, true);
+      this.button.addEventListener('click', this.handleClickBound);
+    }
+
+    disconnectedCallback() {
+      if (!this.button || !this.handleClickBound) return;
+      this.removeEventListener('click', this.stopBubbleBound, true);
+      this.removeEventListener('pointerdown', this.stopBubbleBound, true);
+      this.button.removeEventListener('click', this.handleClickBound);
+    }
+
+    stopBubble(event) {
+      event.stopPropagation();
+    }
+
+    async handleClick(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!this.button || this.button.disabled) return;
+
+      const variantId = this.dataset.variantId;
+      const quantity = Number(this.dataset.quantity || '1');
+      const discountCode = (this.dataset.discountCode || '').trim();
+      const redirectToCart = this.dataset.redirectToCart === 'true';
+
+      if (!variantId) return;
+
+      this.button.disabled = true;
+
+      try {
+        const addResponse = await fetch((window.Theme && window.Theme.routes && window.Theme.routes.cart_add_url) || '/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ id: variantId, quantity }),
+        });
+
+        if (!addResponse.ok) throw new Error('Cart add failed');
+
+        if (discountCode) {
+          const updateResponse = await fetch(
+            (window.Theme && window.Theme.routes && window.Theme.routes.cart_update_url) || '/cart/update.js',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+              },
+              body: JSON.stringify({ discount: discountCode }),
+            }
+          );
+
+          if (!updateResponse.ok) throw new Error('Discount apply failed');
+        }
+
+        if (redirectToCart) {
+          window.location.href = '/cart';
+          return;
+        }
+
+        document.dispatchEvent(
+          new CustomEvent('cart:update', {
+            bubbles: true,
+            detail: {
+              sourceId: 'product-card-discount-add',
+              data: {
+                source: 'product-card-discount-add',
+                itemCount: quantity,
+              },
+            },
+          })
+        );
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.button.disabled = false;
+      }
+    }
+  }
+
+  if (!customElements.get('discount-add-to-cart')) {
+    customElements.define('discount-add-to-cart', DiscountAddToCart);
+  }
+{% endjavascript %}

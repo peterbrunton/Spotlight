@@ -1,0 +1,91 @@
+{% comment %}
+  Snippet: soc-location-switch.liquid
+  Usage: {% render 'l-ext-location-switch' %}
+
+  Global location switcher that detects user's country and shows appropriate store options.
+  Configured via Theme Settings > Location Switcher
+{% endcomment %}
+
+{% if settings.location_switcher_enabled %}
+
+{% liquid 
+  assign currentPath = request.path 
+  if currentPath contains '/products/'
+    assign grabProductHandle = currentPath | split: '/products/'
+    assign universalPath = grabProductHandle[1] | prepend: '/products/'
+  else
+    assign universalPath = currentPath
+  endif 
+  
+  assign uk_url = settings.location_switcher_uk_url | default: 'https://uk.spotlightoralcare.com'
+  assign eu_url = settings.location_switcher_eu_url | default: 'https://eu.spotlightoralcare.com'
+  assign uk_flag = settings.location_switcher_uk_flag | default: '//cdn.shopify.com/s/files/1/0177/9856/1846/files/gb.svg?v=1688457625'
+  assign eu_flag = settings.location_switcher_eu_flag | default: '//cdn.shopify.com/s/files/1/0177/9856/1846/files/eu.svg?v=1688457564'
+%}
+
+<location-switcher class="location-switcher">
+  <dialog ref="dialog" class="location-switcher__dialog">
+    <div class="location-switcher__header">
+      <h3 class="location-switcher__title">
+        {{ settings.location_switcher_title | default: 'Are you in the right place?' }}
+      </h3>
+      <button 
+        class="location-switcher__close" 
+        aria-label="Close"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Great Britain Content (England, Scotland, Wales) -->
+    <div ref="gbContent" class="location-switcher__content" hidden>
+      {{ settings.location_switcher_gb_message | default: '<p>Shopping from Great Britain? Please use our UK store for UK delivery.</p>' }}
+      <div class="location-switcher__buttons">
+        <a href="{{ uk_url }}{{ universalPath }}" class="location-switcher__button">
+          <img src="{{ uk_flag }}" alt="UK Flag" width="24" height="16" loading="lazy">
+          {{ settings.location_switcher_uk_text | default: 'England, Scotland & Wales' }}
+        </a>
+        <button class="location-switcher__button location-switcher__button--stay">
+          <img src="{{ eu_flag }}" alt="EU Flag" width="24" height="16" loading="lazy">
+          {{ settings.location_switcher_eu_text | default: 'Europe & Northern Ireland' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Northern Ireland Content -->
+    <div ref="niContent" class="location-switcher__content" hidden>
+      {{ settings.location_switcher_ni_message | default: '<p>Shopping from Northern Ireland? Stay on our EU store for our fastest shipping times.</p>' }}
+      <button class="location-switcher__button location-switcher__button--stay">
+        <img src="{{ eu_flag }}" alt="EU Flag" width="24" height="16" loading="lazy">
+        {{ settings.location_switcher_eu_text | default: 'Europe & Northern Ireland' }}
+      </button>
+    </div>
+
+    <!-- Rest of World Content -->
+    <div ref="rowContent" class="location-switcher__content" hidden>
+      <p>Choose your preferred store:</p>
+      <div class="location-switcher__buttons">
+        <a href="{{ eu_url }}{{ universalPath }}" class="location-switcher__button">
+          <img src="{{ eu_flag }}" alt="EU Flag" width="24" height="16" loading="lazy">
+          {{ settings.location_switcher_eu_text | default: 'Europe & Northern Ireland' }}
+        </a>
+        <a href="{{ uk_url }}{{ universalPath }}" class="location-switcher__button">
+          <img src="{{ uk_flag }}" alt="UK Flag" width="24" height="16" loading="lazy">
+          {{ settings.location_switcher_uk_text | default: 'England, Scotland & Wales' }}
+        </a>
+      </div>
+    </div>
+  </dialog>
+</location-switcher>
+
+
+<script
+  src="{{ 'l-ext-location-switch.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% endif %}

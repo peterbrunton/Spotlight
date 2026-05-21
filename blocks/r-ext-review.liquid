@@ -1,0 +1,388 @@
+{% if request.page_type == 'product' %}
+    <!-- Product page: load normally -->
+    <div class="trustpilot-widget"
+      data-locale="en-US"
+      data-template-id="577258fb31f02306e4e3aaf9"
+      data-businessunit-id="61779bdfa2f7e91d5664a01e"
+      data-style-height="24px"
+      data-style-width="100%"
+      data-token="14accc57-bc4a-4bad-b54c-e94cdd7030e6"
+      data-sku="{{ product.selected_or_first_available_variant.sku }}"
+      data-no-reviews="hide"
+      data-scroll-to-list="true"
+      data-style-alignment="left"
+      data-star-color="#262626" 
+      data-text-color="#262626"
+      data-font-family="Roboto Condensed"
+    >
+      <a href="https://www.trustpilot.com/review/eu.spotlightoralcare.com" target="_blank" rel="noopener">Trustpilot</a>
+    </div>
+{% else %}
+    <!-- Collection/card: lazy load via IntersectionObserver -->
+    <div class="tp-lazy"
+      data-locale="en-US"
+      data-tp-template="577258fb31f02306e4e3aaf9"
+      data-tp-bu="61779bdfa2f7e91d5664a01e"
+      data-tp-token="14accc57-bc4a-4bad-b54c-e94cdd7030e6"
+      data-tp-sku="{{ closest.product.selected_or_first_available_variant.sku }}"
+      data-style-height="24px"
+      data-style-width="100%"
+      data-no-reviews="hide"
+      data-style-alignment="left"
+      data-star-color="#262626" 
+      data-text-color="#262626"
+      data-font-family="Roboto Condensed"
+    >
+    </div>
+{% endif %}
+
+{% stylesheet %}
+  .wrapper-company-stars {
+    justify-content: start!important;
+  }
+  .trustpilot-widget {
+    padding-top: 3px;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.product_review_stars",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Displays Trustpilot Product Mini MultiSource widget"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "default": "left"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_review_stars",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% comment %}{% if request.page_type == 'product' %}
+  <div
+    class="rating-wrapper justify-{{ block_settings.alignment }} rating-color--{{ block_settings.rating_color }}"
+    {{ block.shopify_attributes }}
+  >
+
+    {% if product.variants.size == 1 %}
+    <div class="ruk_rating_snippet" data-sku="{{ product.selected_or_first_available_variant.sku }}"></div>
+    {% else %}
+    <div class="ruk_rating_snippet" data-sku="[{% for variant in product.variants %}{{ variant.sku }};{% endfor %}]"></div>
+    {% endif %}
+  </div>
+{% else %}
+
+  {% liquid
+    assign block_settings = block.settings
+    assign product = closest.product
+
+    assign rating_raw = product.metafields.reviewscouk.rating.value.rating | default: product.metafields.reviews.rating.value.rating
+    assign rating = rating_raw | plus: 0
+    assign scale_max = 5
+    assign rating_count = product.metafields.reviewscouk.rating_count | default: product.metafields.reviewscouk.total | default: product.metafields.reviews.rating_count | plus: 0
+
+  %}
+
+  {%- if rating_count > 0 and rating > 0 -%}
+    {% liquid
+      # Clamp rating between 0 and scale_max
+      if rating > scale_max
+        assign rating = scale_max
+      endif
+      if rating < 0
+        assign rating = 0
+      endif
+
+      assign star_count_rating = scale_max
+
+      assign integer_rating = rating | floor
+      assign decimal = rating | minus: integer_rating
+      assign decimal_percent = decimal | times: 100 | round
+      assign has_decimal = false
+
+      if decimal_percent > 0 and integer_rating < scale_max
+        assign has_decimal = true
+      endif
+
+      assign partial_star_index = integer_rating | plus: 1
+
+      # For single-star style, fill proportionally
+      assign single_percent = rating | divided_by: scale_max | times: 100 | round
+    %}
+    <div class="rating-wrapper">
+      <div
+        class="rating"
+        style="--star-size: calc(var(--font-{{ block_settings.type_preset }}--size) * 1.1);"
+        aria-label="{{ 'accessibility.rating' | t: rating: rating }}"
+      >
+        {% if block_settings.stars_style == 'single' %}
+          <svg
+            class="stars"
+            viewBox="0 0 32 32"
+            role="presentation"
+          >
+            <defs>
+              <linearGradient id="single-{{ section.id }}-{{ block.id }}" x1="0" x2="100%" y1="0" y2="0">
+                <stop offset="0%" stop-color="var(--star-fill-color)" />
+                <stop offset="{{ single_percent }}%" stop-color="var(--star-fill-color)" />
+                <stop offset="{{ single_percent }}%" stop-color="var(--empty-star-fill-color)" />
+                <stop offset="100%" stop-color="var(--empty-star-fill-color)" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M16 3 L20 12 L29 13 L22 19 L23 28 L16 23 L9 28 L10 19 L3 13 L12 12 Z"
+              fill="url(#single-{{ section.id }}-{{ block.id }})"
+            ></path>
+            {% if block_settings.stars_style == "outline" %}
+              <path
+                d="M16 3 L20 12 L29 13 L22 19 L23 28 L16 23 L9 28 L10 19 L3 13 L12 12 Z"
+                fill="none"
+                stroke="var(--star-fill-color)"
+                stroke-width="var(--icon-stroke-width)"
+              ></path>
+            {% endif %}
+          </svg>
+        {% else %}
+          {%- for star in (1..star_count_rating) -%}
+            {%- assign is_partial_star = false -%}
+            {%- if has_decimal and star == partial_star_index -%}
+              {%- assign is_partial_star = true -%}
+            {%- endif -%}
+
+            <svg
+              class="stars {% if star <= integer_rating %}filled-star{% endif %}"
+              viewBox="0 0 32 32"
+              role="presentation"
+            >
+              {% if is_partial_star %}
+                <defs>
+                  <linearGradient id="partial-{{ section.id }}-{{ block.id }}-{{ forloop.index }}" x1="0" x2="100%" y1="0" y2="0">
+                    <!-- Filled portion -->
+                    <stop offset="0%" stop-color="var(--star-fill-color)" />
+                    <stop offset="{{ decimal_percent }}%" stop-color="var(--star-fill-color)" />
+                    <!-- Empty portion uses the same empty-star color as the rest -->
+                    <stop offset="{{ decimal_percent }}%" stop-color="{% if block_settings.stars_style == "outline" %}transparent{% else %}var(--empty-star-fill-color){% endif %}" />
+                    <stop offset="100%" stop-color="{% if block_settings.stars_style == "outline" %}transparent{% else %}var(--empty-star-fill-color){% endif %}" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M16 3 L20 12 L29 13 L22 19 L23 28 L16 23 L9 28 L10 19 L3 13 L12 12 Z"
+                  fill="url(#partial-{{ section.id }}-{{ block.id }}-{{ forloop.index }})"
+                ></path>
+              {% else %}
+                <path
+                  d="M16 3 L20 12 L29 13 L22 19 L23 28 L16 23 L9 28 L10 19 L3 13 L12 12 Z"
+                ></path>
+              {% endif %}
+
+              {% if block_settings.stars_style == "outline" %}
+                <path
+                  d="M16 3 L20 12 L29 13 L22 19 L23 28 L16 23 L9 28 L10 19 L3 13 L12 12 Z"
+                  fill="none"
+                  stroke="var(--star-fill-color)"
+                  stroke-width="var(--icon-stroke-width)"
+                ></path>
+              {% endif %}
+            </svg>
+          {%- endfor -%}
+        {% endif %}
+      </div>
+      {%- if block_settings.show_number or block_settings.stars_style == 'single' -%}
+      <p class="rating-count {{ block_settings.type_preset }}">
+        {%- if block_settings.stars_style == 'single' -%}
+          <span aria-hidden="true">{{- rating | round: 1 }}</span>
+        {%- endif -%}
+        {%- if block_settings.stars_style == 'single' and block_settings.show_number -%}
+          <span class="rating-count-separator">|</span>
+        {%- endif -%}
+        {%- if block_settings.show_number -%}
+          {{- rating_count }}
+          {{ 'content.reviews' | t }}
+        {%- endif -%}
+      </p>
+      {%- endif -%}
+    </div>
+
+  {%- endif -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .rating-wrapper {
+    width: 100%;
+    gap: var(--gap-xs);
+    flex-wrap: wrap;
+  }
+
+  .rating-color--primary {
+    --star-fill-color: var(--color-primary);
+    --star-fill-color-rgb: var(--color-primary-rgb);
+  }
+
+  .rating-color--foreground {
+    --star-fill-color: var(--color-foreground);
+    --star-fill-color-rgb: var(--color-foreground-rgb);
+  }
+
+  .rating-wrapper,
+  .rating {
+    display: flex;
+    align-items: center;
+  }
+
+  .rating-wrapper.justify-right {
+    flex-direction: row-reverse;
+  }
+
+  .rating {
+    gap: var(--gap-3xs);
+  }
+
+  .rating-wrapper .rating-text,
+  .rating-wrapper .rating-count,
+  .rating-wrapper .rating-count-separator {
+    color: var(--star-fill-color);
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .rating-count-separator {
+    opacity: var(--opacity-20);
+    padding-left: calc(var(--padding-xs) / 2);
+    padding-right: var(--padding-xs);
+  }
+
+  .stars {
+    height: var(--star-size);
+    --empty-star-fill-color: rgba(26, 26, 26, 0.2);
+    fill: var(--empty-star-fill-color);
+  }
+
+  .filled-star {
+    fill: var(--star-fill-color);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.product_review_stars",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.resource_reference_product_review"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:content.app_required_for_ratings"
+    },
+    {
+      "type": "select",
+      "id": "stars_style",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "outline",
+          "label": "t:options.outline"
+        },
+        {
+          "value": "shaded",
+          "label": "t:options.shaded"
+        },
+        {
+          "value": "single",
+          "label": "t:options.single"
+        }
+      ],
+      "default": "shaded"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_number",
+      "label": "t:settings.review_count",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "rating_color",
+      "label": "t:settings.color",
+      "options": [
+        {
+          "value": "foreground",
+          "label": "t:options.text"
+        },
+        {
+          "value": "primary",
+          "label": "t:options.body"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "header",
+      "content": "t:content.typography"
+    },
+    {
+      "type": "select",
+      "id": "type_preset",
+      "label": "t:settings.preset",
+      "options": [
+        {
+          "value": "paragraph",
+          "label": "t:options.paragraph"
+        },
+        {
+          "value": "h1",
+          "label": "t:options.h1"
+        },
+        {
+          "value": "h2",
+          "label": "t:options.h2"
+        },
+        {
+          "value": "h3",
+          "label": "t:options.h3"
+        },
+        {
+          "value": "h4",
+          "label": "t:options.h4"
+        },
+        {
+          "value": "h5",
+          "label": "t:options.h5"
+        },
+        {
+          "value": "h6",
+          "label": "t:options.h6"
+        }
+      ],
+      "default": "paragraph"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "default": "left"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_review_stars",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+ 
+{% endcomment %}

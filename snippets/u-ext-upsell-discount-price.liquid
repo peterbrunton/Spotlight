@@ -1,0 +1,82 @@
+{%- doc -%}
+  Renders a discounted upsell price while preserving regular price as compare-at.
+  @param {product} product_resource - The product to render
+  @param {number} discount_percentage - Discount percent (0-100)
+  @param {boolean} [show_unit_price] - Whether to show unit price
+  @param {boolean} [show_sale_price_first] - Whether to show sale price first
+{%- enddoc -%}
+
+{%- liquid
+  assign show_unit_price = show_unit_price | default: false
+  assign show_sale_price_first = show_sale_price_first | default: false
+  assign selected_variant = product_resource.selected_or_first_available_variant
+
+  assign original_price = selected_variant.price
+  assign discount_percentage = discount_percentage | default: 0 | plus: 0 | at_least: 0 | at_most: 100
+  assign discount_multiplier = 100 | minus: discount_percentage
+  assign discounted_price = original_price | times: discount_multiplier | divided_by: 100
+
+  if product_resource == blank
+    assign original_price = 1999
+    assign discounted_price = 1999
+  endif
+
+  assign show_compare_price = false
+  if discount_percentage > 0 and discounted_price < original_price
+    assign show_compare_price = true
+  endif
+
+  if product and closest and closest.product and product.handle == closest.product.handle and settings.currency_code_enabled_product_pages
+    assign original_price = original_price | money_with_currency
+    assign discounted_price = discounted_price | money_with_currency
+  elsif settings.currency_code_enabled_product_cards
+    assign original_price = original_price | money_with_currency
+    assign discounted_price = discounted_price | money_with_currency
+  else
+    assign original_price = original_price | money
+    assign discounted_price = discounted_price | money
+  endif
+-%}
+
+<div ref="priceContainer">
+  {% if show_compare_price and show_sale_price_first == false %}
+    <span role="group">
+      <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+      <span class="compare-at-price">{{- original_price -}}</span>
+    </span>
+  {% endif %}
+
+  {% if show_compare_price %}
+    <span role="group">
+      <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+      <span class="price">{{ discounted_price | default: '&nbsp;' }}</span>
+    </span>
+  {% else %}
+    <span class="price">{{ original_price | default: '&nbsp;' }}</span>
+  {% endif %}
+
+  {% if show_compare_price and show_sale_price_first %}
+    <span role="group">
+      <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+      <span class="compare-at-price">{{- original_price -}}</span>
+    </span>
+  {% endif %}
+
+  {%- if selected_variant.unit_price and show_unit_price -%}
+    {%- liquid
+      assign unit_price = selected_variant.unit_price
+      if discount_percentage > 0
+        assign unit_price = unit_price | times: discount_multiplier | divided_by: 100
+      endif
+
+      if product and closest and closest.product and product.handle == closest.product.handle and settings.currency_code_enabled_product_pages
+        assign unit_price = unit_price | money_with_currency
+      elsif settings.currency_code_enabled_product_cards
+        assign unit_price = unit_price | money_with_currency
+      else
+        assign unit_price = unit_price | money
+      endif
+    -%}
+    {% render 'unit-price', price: unit_price, measurement: selected_variant.unit_price_measurement %}
+  {%- endif -%}
+</div>
