@@ -1,3 +1,11 @@
+{%- doc -%}
+  Renders the desktop header menu nav and overflow list.
+  Called from the _h-ext-header-menu block's default case.
+
+  @param {object} block - The block object.
+  @param {object} section - The section object.
+{%- enddoc -%}
+
 {% liquid
   assign block_settings = block.settings
   assign menu_content_type = block_settings.menu_style | default: 'text'
@@ -82,12 +90,18 @@
   </li>
 {% endcapture %}
 
-<nav header-menu>
-  <div
-    class="menu-list"
-    style="{% render 'menu-font-styles', settings: block_settings %}"
-  >
-    {% assign class = 'overflow-menu' | append: color_scheme_classes %}
-    {% render 'o-ext-overflow-list', class: class, ref: 'overflowMenu', children: children, minimum-items: 2, defer: true %}
-  </div>
+<nav
+  class="menu-list"
+  aria-label="{{ 'accessibility.header_navigation_label' | t }}"
+  style="{% render 'menu-font-styles', settings: block_settings, menu_type: 'mega_menu' %}"
+>
+  {% assign class = 'overflow-menu' | append: color_scheme_classes %}
+  {% render 'o-ext-overflow-list',
+    class: class,
+    ref: 'overflowMenu',
+    children: children,
+    minimum-items: 2,
+    defer: true,
+    attributes: 'data-skip-node-update'
+  %}
 </nav>

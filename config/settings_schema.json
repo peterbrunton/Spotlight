@@ -353,14 +353,28 @@
       },
       {
         "type": "text",
+        "id": "custom_body_font_name",
+        "label": "Custom body font name",
+        "default": "AcuminCondensed",
+        "info": "CSS font-family name used in @font-face and your CSS variables"
+      },
+      {
+        "type": "text",
         "id": "custom_body_font",
-        "label": "Custom body font",
+        "label": "Custom body font file URL (.woff2)",
         "default": "https://cdn.shopify.com/s/files/1/0177/9856/1846/files/acuminproextracond-medium-webfont.woff2?v=1751453035"
       },
       {
         "type": "text",
+        "id": "custom_heading_font_name",
+        "label": "Custom heading font name",
+        "default": "AcuminExtraCondensed",
+        "info": "CSS font-family name used in @font-face and your CSS variables"
+      },
+      {
+        "type": "text",
         "id": "custom_heading_font",
-        "label": "Custom heading bold",
+        "label": "Custom heading font file URL (.woff2)",
         "default": "https://cdn.shopify.com/s/files/1/0177/9856/1846/files/acuminproextracond-black-webfont.woff2?v=1751453300"
       },
       {

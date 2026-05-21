@@ -1,7 +1,7 @@
 import { OverflowList } from '@theme/critical';
 import VariantPicker from '@theme/variant-picker';
 import { Component } from '@theme/component';
-import { debounce, isDesktopBreakpoint, mediaQueryLarge, requestYieldCallback } from '@theme/utilities';
+import { debounce, isDesktopBreakpoint, mediaQueryLarge, requestYieldCallback } from '@theme/u-ext-utilities';
 import { ThemeEvents, VariantSelectedEvent, VariantUpdateEvent, SlideshowSelectEvent } from '@theme/events';
 import { morph } from '@theme/morph';
 

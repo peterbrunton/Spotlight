@@ -6,6 +6,7 @@
   @param {string} [more-attributes] - The attributes that are applied on the more button slot.
   @param {string} [more-button-attributes] - The attributes that are applied directly on the more button element.
   @param {string} [ref] - The ref that is set on the overflow-list element.
+  @param {string} [attributes] - Extra attributes to output on the overflow-list element.
 {%- enddoc -%}
 
 <overflow-list
@@ -20,6 +21,9 @@
   {% endif %}
   {% if defer %}
     defer
+  {% endif %}
+  {% if attributes %}
+    {{ attributes }}
   {% endif %}
 >
   <template shadowrootmode="open">

@@ -36,7 +36,7 @@
 
 <header-drawer
   class="header-drawer {{ class }}"
-  style="--menu-image-border-radius: {{ image_border_radius }}px;"
+  style="--menu-image-border-radius: {{ image_border_radius }}px; --resource-card-corner-radius: {{ image_border_radius }}px;"
 >
   <details
     id="Details-menu-drawer-container"
@@ -58,6 +58,7 @@
       </span>
     </summary>
     <div
+      ref="menuDrawer"
       data-header-drawer
       class="
         menu-drawer
@@ -77,6 +78,7 @@
       </button>
       <nav
         class="menu-drawer__navigation"
+        aria-label="{{ 'accessibility.header_navigation_label' | t }}"
         style="
           {%- render 'menu-font-styles', settings: block_settings, menu_type: 'drawer' %}
           {%- render 's-ext-submenu-font-styles', settings: block_settings %}
@@ -118,7 +120,7 @@
                         id="HeaderDrawer-{{ link.handle }}"
                         class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset"
                       >
-                        <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                        <span class="menu-drawer__menu-item-text wrap-text">{{ link.title | escape }}</span>
                         <span class="svg-wrapper icon-plus">
                           {{- 'icon-plus.svg' | inline_asset_content -}}
                         </span>
@@ -159,7 +161,7 @@
                                   sizes: 'auto, 400px'
                                 %}
                               {% endif %}
-                              <span class="menu-drawer__menu-item-text">{{ childlink.title | escape }}</span>
+                              <span class="menu-drawer__menu-item-text wrap-text">{{ childlink.title | escape }}</span>
                             </a>
                           </li>
                         {%- endfor -%}
@@ -178,7 +180,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text wrap-text">{{ link.title | escape }}</span>
                   </a>
                   {% liquid
                     assign render_link_image = false
@@ -212,7 +214,7 @@
                               sizes: 'auto, 400px'
                             %}
                           {% endif %}
-                          <span class="menu-drawer__menu-item-text">{{ childlink.title | escape }}</span>
+                          <span class="menu-drawer__menu-item-text wrap-text">{{ childlink.title | escape }}</span>
                         </a>
                       </li>
                     {%- endfor -%}
@@ -229,7 +231,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text wrap-text">{{ link.title | escape }}</span>
                   </a>
                 {% endif %}
               </li>
@@ -256,9 +258,9 @@
                     <summary
                       id="HeaderDrawer-{{ link.handle }}"
                       class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset{% if link.child_active %} menu-drawer__menu-item--active{% endif %}"
-                      on:click="header-drawer/open"
+                      on:click="header-drawer/open/submenu"
                     >
-                      <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                      <span class="menu-drawer__menu-item-text wrap-text">{{ link.title | escape }}</span>
                       <span class="svg-wrapper icon-caret icon-caret--forward">
                         {{- 'icon-caret.svg' | inline_asset_content -}}
                       </span>
@@ -273,14 +275,13 @@
                         <div class="menu-drawer__nav-buttons">
                           <button
                             class="button menu-drawer__back-button focus-inset"
-                            aria-expanded="true"
                             on:click="header-drawer/back"
-                            aria-label="{{ 'actions.back' | t }}"
+                            aria-label="{{ 'actions.back_to' | t: title: link.title }}"
                           >
                             <span class="svg-wrapper icon-caret icon-caret--backward">
                               {{- 'icon-caret.svg' | inline_asset_content -}}
                             </span>
-                            <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                            <span class="menu-drawer__menu-item-text wrap-text">{{ link.title | escape }}</span>
                           </button>
                           <button
                             class="button close-button menu-drawer__close-button"
@@ -340,7 +341,7 @@
                                       sizes: 'auto, 400px'
                                     %}
                                   {% endif %}
-                                  <span class="menu-drawer__menu-item-text">
+                                  <span class="menu-drawer__menu-item-text wrap-text">
                                     {{- childlink.title | escape -}}
                                   </span>
                                 </a>
@@ -365,7 +366,7 @@
                                         id="HeaderDrawer-{{ link.handle }}-{{ childlink.handle }}"
                                         class="menu-drawer__menu-item menu-drawer__menu-item--parent focus-inset"
                                       >
-                                        <span class="menu-drawer__menu-item-text">{{ childlink.title | escape }}</span>
+                                        <span class="menu-drawer__menu-item-text wrap-text">{{ childlink.title | escape }}</span>
                                         <span class="svg-wrapper icon-plus">
                                           {{- 'icon-plus.svg' | inline_asset_content -}}
                                         </span>
@@ -406,7 +407,7 @@
                                                   sizes: 'auto, 400px'
                                                 %}
                                               {% endif %}
-                                              <span class="menu-drawer__menu-item-text">
+                                              <span class="menu-drawer__menu-item-text wrap-text">
                                                 {{- grandchildlink.title | escape -}}
                                               </span>
                                             </a>
@@ -424,7 +425,7 @@
                                     href="{{ childlink.url }}"
                                     class="menu-drawer__menu-item menu-drawer__menu-item--parent focus-inset{% if childlink.current %} menu-drawer__menu-item--active{% endif %}"
                                   >
-                                    <span class="menu-drawer__menu-item-text">{{ childlink.title | escape }}</span>
+                                    <span class="menu-drawer__menu-item-text wrap-text">{{ childlink.title | escape }}</span>
                                   </a>
                                   {% liquid
                                     assign render_link_image = false
@@ -462,7 +463,7 @@
                                               sizes: 'auto, 400px'
                                             %}
                                           {% endif %}
-                                          <span class="menu-drawer__menu-item-text">
+                                          <span class="menu-drawer__menu-item-text wrap-text">
                                             {{- grandchildlink.title | escape -}}
                                           </span>
                                         </a>
@@ -540,7 +541,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text wrap-text">{{ link.title | escape }}</span>
                   </a>
                 {%- endif -%}
               </li>

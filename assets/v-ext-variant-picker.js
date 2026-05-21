@@ -2,7 +2,7 @@ import { Component } from '@theme/component';
 import { VariantSelectedEvent, VariantUpdateEvent } from '@theme/events';
 import { morph } from '@theme/morph';
 import { OverflowList } from '@theme/overflow-list';
-import { requestYieldCallback } from '@theme/utilities';
+import { requestYieldCallback } from '@theme/u-ext-utilities';
 
 /**
  * A custom element that manages a variant picker.

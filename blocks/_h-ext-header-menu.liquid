@@ -68,10 +68,11 @@
       class="header-menu mobile:hidden"
       data-animation-delay="{{ animation_speed }}"
       {{ block.shopify_attributes }}
+      data-hydration-key="header-menu"
       style="--submenu-animation-speed: {{ animation_speed }}ms;{{ title_case_style }}"
     >
       <div class="header-menu__inner">
-        {%- render 'h-ext-header-menu' %}
+        {%- render 'h-ext-header-menu', block: block, section: section %}
       </div>
 
       <script

@@ -332,7 +332,7 @@
                   {% assign can_update_quantity = item.instructions.can_update_quantity
                     | default: true, allow_false: true
                   %}
-                  {% render 'q-ext-quantity-selector',
+                  {% render 'quantity-selector',
                     product: item.product,
                     in_cart_quantity: item.quantity,
                     line_index: item.index,

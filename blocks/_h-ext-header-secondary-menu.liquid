@@ -24,61 +24,77 @@
       --submenu-animation-speed: {{ animation_delay }}ms;
     "
   >
-    <div class="header-secondary-menu__inner">
-      <nav class="secondary-menu-nav">
-        <ul class="menu-list__list list-unstyled" role="list">
-          {% for link in menu_links %}
-            <li
-              role="presentation"
-              class="menu-list__list-item header-secondary-menu__item"
-              on:focus="/activate"
-              on:blur="/deactivate"
-              on:pointerenter="/activate"
-              on:pointerleave="/deactivate"
+    {% capture children %}
+    {% for link in menu_links %}
+      <li
+        role="presentation"
+        class="menu-list__list-item header-secondary-menu__item"
+        on:focus="/activate"
+        on:blur="/deactivate"
+        on:pointerenter="/activate"
+        on:pointerleave="/deactivate"
+      >
+        <a
+          href="{{ link.url }}"
+          data-skip-node-update="true"
+          class="menu-list__link header-secondary-menu__link{% if link.active %} menu-list__link--active{% endif %}"
+          {%- if link.links != blank -%}
+            aria-controls="secondary-submenu-{{ forloop.index }}"
+            aria-haspopup="true"
+            aria-expanded="false"
+          {%- endif -%}
+          ref="menuitem"
+        >
+          <span class="menu-list__link-title">{{- link.title -}}</span>
+        </a>
+        {%- if link.links != blank -%}
+          <div class="menu-list__submenu header-secondary-menu__submenu" ref="submenu[]">
+            <div
+              id="secondary-submenu-{{ forloop.index }}"
+              class="menu-list__submenu-inner header-secondary-menu__submenu-inner"
             >
-              <a
-                href="{{ link.url }}"
-                data-skip-node-update="true"
-                class="menu-list__link header-secondary-menu__link{% if link.active %} menu-list__link--active{% endif %}"
-                {%- if link.links != blank -%}
-                  aria-controls="secondary-submenu-{{ forloop.index }}"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                {%- endif -%}
-                ref="menuitem"
-              >
-                <span class="menu-list__link-title">{{- link.title -}}</span>
-              </a>
-              {%- if link.links != blank -%}
-                <div class="menu-list__submenu header-secondary-menu__submenu" ref="submenu[]">
-                  <div
-                    id="secondary-submenu-{{ forloop.index }}"
-                    class="menu-list__submenu-inner header-secondary-menu__submenu-inner"
-                  >
-                    <ul class="header-secondary-menu__submenu-list list-unstyled" role="list">
-                      {% for childlink in link.links %}
-                        <li class="header-secondary-menu__submenu-item">
-                          <a
-                            href="{{ childlink.url }}"
-                            class="header-secondary-menu__submenu-link{% if childlink.current %} header-secondary-menu__submenu-link--active{% endif %}"
-                            {% if childlink.current %}
-                              aria-current="page"
-                            {% endif %}
-                          >
-                            {{ childlink.title | escape }}
-                          </a>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  </div>
-                </div>
-              {%- endif -%}
-            </li>
-          {% endfor %}
-        </ul>
-      </nav>
-    </div>
-  </header-menu>
+              <ul class="header-secondary-menu__submenu-list list-unstyled" role="list">
+                {% for childlink in link.links %}
+                  <li class="header-secondary-menu__submenu-item">
+                    <a
+                      href="{{ childlink.url }}"
+                      class="header-secondary-menu__submenu-link{% if childlink.current %} header-secondary-menu__submenu-link--active{% endif %}"
+                      {% if childlink.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      {{ childlink.title | escape }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {%- endif -%}
+      </li>
+    {% endfor %}
+    <li class="menu-list__list-item" role="presentation" slot="more" on:focus="/activate" on:blur="/deactivate" on:pointerenter="/activate" on:pointerleave="/deactivate">
+      <button role="menuitem" class="button menu-list__link button-unstyled">
+        <span class="menu-list__link-title">{{ 'actions.more' | t }}</span>
+      </button>
+    </li>
+  {% endcapture %}
+
+  <div class="header-secondary-menu__inner">
+    <nav
+      class="secondary-menu-nav"
+      aria-label="{{ 'accessibility.header_navigation_label' | t }}"
+    >
+      {% render 'overflow-list',
+        ref: 'overflowMenu',
+        children: children,
+        class: 'secondary-overflow-menu',
+        minimum-items: 2,
+        attributes: 'data-skip-node-update'
+      %}
+    </nav>
+  </div>
+</header-menu>
 {% endif %}
 
 {% stylesheet %}
@@ -95,7 +111,7 @@
     align-items: center;
   }
 
-  .header-secondary-menu .menu-list__list {
+  .header-secondary-menu overflow-list::part(list) {
     gap: var(--secondary-menu-gap, var(--gap-lg));
     justify-content: flex-end;
   }
